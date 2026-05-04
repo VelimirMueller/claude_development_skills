@@ -27,7 +27,3 @@ Run `bash scripts/validate.sh` to check that:
 - `.claude-plugin/plugin.json` parses and has the required fields.
 - Every `SKILL.md` has YAML frontmatter with `name` and `description` (the latter starting with `Use when`).
 - Every relative reference link in a `SKILL.md` resolves to an existing file.
-
-## Design spec
-
-See `docs/superpowers/specs/2026-05-04-frontendskills-plugin-design.md` for the full design rationale, skill inventory, and authoring conventions.
