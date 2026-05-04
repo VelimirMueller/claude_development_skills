@@ -38,3 +38,7 @@ Convention used by every skill in this plugin: before installing or modifying an
 
 ## Idempotent
 A skill is idempotent if running it twice produces the same final state as running it once. Audit-first is the mechanism that makes skills idempotent.
+
+## When to deviate
+
+Glossary entries are definitions, not rules — there's no "deviate" axis the way rule files have one. Deviate from a definition only when the project's domain language fundamentally redefines a term (e.g., a design system that calls atoms "primitives" — adopt the design-system term locally). When that happens, document the local term right next to the canonical one so cross-domain readers aren't lost.

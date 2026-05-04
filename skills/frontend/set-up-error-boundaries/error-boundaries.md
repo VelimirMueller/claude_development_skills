@@ -141,3 +141,10 @@ export function reportError(error: Error, context: ErrorContext = {}): void {
 ```
 
 The boundaries don't change.
+
+## When to deviate
+
+- **Existing boundary library:** if the project already uses `react-error-boundary` (or a similar wrapper), adopt its API — the strategy is the same, the syntax differs. Don't introduce a parallel implementation.
+- **Vue with an app-level error handler:** projects that registered `app.config.errorHandler` already have an app-shell-equivalent. Audit the handler before adding the molecule wrapper at the same depth; layered wraps fire twice unless the inner one returns `false`.
+- **No page templates yet:** if the app has no `src/components/pages/` or templates yet, skip the page-level placement and revisit when structure is in place. The app-shell boundary alone is enough until then.
+- **Library code (not an app):** boundaries belong in the consuming app, not in a published component library. Library code should let the consumer decide placement.

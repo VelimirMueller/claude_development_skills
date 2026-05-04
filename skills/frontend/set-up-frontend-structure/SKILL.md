@@ -172,6 +172,8 @@ Expected: 0 errors. The example components compile (test/story imports may resol
 
 If tests / stories fail to resolve `@testing-library/*` or `@storybook/react`, the deps were not installed in skill `scaffold-frontend-project`. Re-run that skill first.
 
+The spec also calls for verifying that Storybook lists the example components; the Storybook test runner is wired in skill `configure-test-stack` (Plan 3). Until that lands, the type-check above is the available verification.
+
 ## References
 - ./atomic-design.md — methodology, criteria for each layer, anti-patterns.
 - ./folder-conventions.md — naming, barrel pattern, hooks vs composables decision.
