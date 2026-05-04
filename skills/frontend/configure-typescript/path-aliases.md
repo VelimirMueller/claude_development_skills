@@ -86,7 +86,7 @@ export default defineConfig({
 ```ts
 // src/tests/global-setup.ts
 import { register } from 'tsconfig-paths';
-import tsconfig from '../../tsconfig.json' assert { type: 'json' };
+import tsconfig from '../../tsconfig.json' with { type: 'json' };
 
 register({
   baseUrl: '.',

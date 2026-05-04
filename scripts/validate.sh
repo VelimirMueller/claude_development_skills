@@ -5,6 +5,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Bash 4.0+ required (mapfile is a 4.0 builtin; macOS ships system bash 3.2)
+[ "${BASH_VERSINFO[0]}" -ge 4 ] || {
+  echo "FAIL: Bash 4.0+ required (macOS: brew install bash, then run via /opt/homebrew/bin/bash)" >&2
+  exit 1
+}
+
 red()   { printf '\033[31m%s\033[0m\n' "$1"; }
 green() { printf '\033[32m%s\033[0m\n' "$1"; }
 fail()  { red "FAIL: $1"; exit 1; }

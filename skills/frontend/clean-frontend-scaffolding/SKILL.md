@@ -1,6 +1,6 @@
 ---
 name: clean-frontend-scaffolding
-description: Use when after scaffolding a fresh frontend project to purge default boilerplate — demo components, default styles, placeholder routes, sample assets — before laying down real structure.
+description: Use when cleaning up a freshly scaffolded frontend project — purges default boilerplate (demo components, default styles, placeholder routes, sample assets) before laying down real structure.
 ---
 
 # Clean Frontend Scaffolding

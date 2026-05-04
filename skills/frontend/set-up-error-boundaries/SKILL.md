@@ -14,6 +14,11 @@ grep -r "ErrorBoundary" src/ 2>/dev/null
 
 Check whether the root component (`src/main.tsx` for React, `src/main.ts` for Vue) already wraps its tree in a boundary.
 
+**Check prerequisites.** This skill writes into atomic-design folders and uses the `@/` import alias. If either is missing, run the relevant prerequisite skill first or fall back to a flat layout:
+
+- `src/components/atoms/` and `src/components/molecules/` exist? If not, run `set-up-frontend-structure` first, or fall back to writing the boundary into `src/components/ErrorBoundary/` (flat) and note the deviation in the project README.
+- `@/*` path alias configured? Check with `grep '"@/\*"' tsconfig.json tsconfig.app.json 2>/dev/null`. If absent, run `configure-typescript` first — the snippets below import from `@/libs/error-reporter` and `@/components/...`.
+
 If a boundary exists and is wired at the root, the audit may still find missing page-level placements; report those.
 
 ## 2. Decide what to do
@@ -126,14 +131,22 @@ export function ErrorFallback({ error, onRetry }: Props) {
 ```vue
 <!-- src/components/atoms/ErrorFallback/ErrorFallback.vue -->
 <script setup lang="ts">
-defineProps<{ error: Error }>();
+defineProps<{ error?: Error; onRetry?: () => void }>();
 </script>
 
 <template>
   <div role="alert" class="p-4 border border-red-500 rounded-md bg-red-50 text-red-900">
     <h2 class="font-semibold">Something went wrong.</h2>
     <p class="text-sm">Please try again. If the problem persists, contact support.</p>
-    <pre v-if="import.meta.env.DEV" class="mt-2 text-xs whitespace-pre-wrap">{{ error.stack ?? error.message }}</pre>
+    <pre v-if="import.meta.env.DEV && error" class="mt-2 text-xs whitespace-pre-wrap">{{ error.stack ?? error.message }}</pre>
+    <button
+      v-if="onRetry"
+      type="button"
+      class="mt-2 px-3 py-1 bg-red-600 text-white rounded"
+      @click="onRetry"
+    >
+      Try again
+    </button>
   </div>
 </template>
 ```
@@ -150,19 +163,16 @@ type ErrorContext = {
 
 /**
  * Reports an error to the configured logging service.
- * Currently logs to console; swap implementation for Sentry/LogRocket later.
+ * Stub: logs to console. Replace the body when a real logger is wired in.
  */
 export function reportError(error: Error, context: ErrorContext = {}): void {
-  if (import.meta.env.PROD) {
-    // Sentry.captureException(error, { contexts: { app: context } });
-    console.error('[reportError]', error, context);
-  } else {
-    console.error('[reportError]', error, context);
-  }
+  // Future logger goes here, e.g.:
+  //   Sentry.captureException(error, { contexts: { app: context } });
+  console.error('[reportError]', error, context);
 }
 ```
 
-The commented-out Sentry call documents the integration seam. Future skill `configure-error-tracking` (Tier 2 / out of scope here) wires this to Sentry.
+The function exists as a single seam so swapping providers later is a one-file change. Future skill `configure-error-tracking` (Tier 2 / out of scope here) wires this to Sentry.
 
 ## 7. Wire boundaries
 
@@ -203,21 +213,27 @@ app.mount('#app');
 
 Then wrap `<App />` content (or page-level components) with `<ErrorBoundary>` slots.
 
-## 8. Generate a Playwright smoke test
+## 8. Generate a Playwright placeholder test
+
+The spec calls for a test that renders a deliberately-throwing component and asserts the `ErrorFallback` is shown. That requires:
+1. A `?throw=1` query handler in `App` that throws on render.
+2. A spec that visits `/?throw=1` and asserts the fallback markup.
+
+Wiring both ends up entangled with the Playwright setup (config, dev-server proxy, page wrappers) that skill `configure-test-stack` (Plan 3) installs. Until that lands, generate a placeholder spec that confirms the page renders without crashing the app-shell boundary — it does NOT yet exercise the catch path:
 
 ```ts
 // src/tests/error-boundary.spec.ts
+// PLACEHOLDER — the real catch-path test arrives with skill `configure-test-stack`.
+// This stub merely confirms the page renders without crashing the app-shell boundary.
 import { test, expect } from '@playwright/test';
 
-test('error boundary catches a render-phase error', async ({ page }) => {
+test('home page renders without crashing the app-shell boundary', async ({ page }) => {
   await page.goto('/');
-  // App-shell boundary should render the page; if anything has thrown, ErrorFallback shows.
-  // This test is a smoke check — extend with a `?throw=1` query the App reads to deliberately throw.
   await expect(page).toHaveTitle(/.+/);
 });
 ```
 
-(Extending the App with a deliberate-throw flag is left to the implementer; the test as-is verifies the page renders without crashing the boundary.)
+Mark the file as a placeholder with the comment block above so it's obvious to a future reader that this test is a stub.
 
 ## 9. Verify
 
