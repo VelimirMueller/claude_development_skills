@@ -1,0 +1,9 @@
+{
+  "name": "frontendskills",
+  "version": "0.1.0",
+  "description": "Opinionated, audit-aware skills for building scalable, maintainable frontend (and later infra/backend) projects.",
+  "author": {
+    "name": "Velimir Mueller",
+    "email": "velimir.mueller@galvany.de"
+  }
+}
