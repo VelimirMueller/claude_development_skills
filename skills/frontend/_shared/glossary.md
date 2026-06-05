@@ -33,6 +33,16 @@ Used in error-boundary placement.
 - **Page-level:** wraps an entire page template so a single route's failure stays isolated.
 - **App-shell:** wraps the root so a catastrophic error doesn't blank the whole app.
 
+## Server state
+State owned by a server and fetched over the network — lists, entities, anything with a canonical copy elsewhere. Managed by TanStack Query, which caches, deduplicates, refetches, and invalidates it.
+
+**Test:** could a server change this value without the user touching the UI? If yes, it's server state.
+
+## Client / UI state
+Ephemeral, client-only state with no server copy — toggles, selections, active filters, theme, wizard step. Managed by Zustand (React) or Pinia (Vue).
+
+**Test:** does it exist only because of what the user is doing in the browser right now? If yes, it's UI state.
+
 ## Audit-first
 Convention used by every skill in this plugin: before installing or modifying anything, the skill reads the current project state and decides what (if anything) needs to change. See spec section 2.5.
 

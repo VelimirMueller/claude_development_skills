@@ -13,7 +13,7 @@ Version policy for frontend projects scaffolded by these skills.
 ## Rule: caret (^) for runtime deps; pinned (~) for build/test tooling
 **Why:** Runtime deps benefit from minor-version updates (security, perf). Build/test tooling churn breaks reproducibility — pin to patch only.
 **How to apply:**
-- `react`, `vue`, `tanstack/query`, etc. → `^X.Y.Z`
+- `react`, `vue`, `@tanstack/react-query`, `@tanstack/vue-query`, `zustand`, `pinia`, etc. → `^X.Y.Z`
 - `vite`, `vitest`, `playwright`, `eslint`, `typescript` → `~X.Y.Z`
 
 **Anti-example:**
