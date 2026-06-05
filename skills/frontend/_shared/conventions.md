@@ -54,6 +54,13 @@ export * from './ErrorFallback';
 - React → `src/hooks/`
 - Vue → `src/composables/`
 
+## Rule: `stores/` holds UI-state stores; one small store per domain
+**Why:** UI state (toggles, selections, filters, theme) is separate from server state, which lives in the TanStack Query cache, not a store. A dedicated folder keeps that boundary visible. One store per domain limits re-render scope and keeps each store readable.
+**How to apply:**
+- React → `src/stores/use<Domain>Store.ts` (Zustand). Example: `useTodoFiltersStore.ts`.
+- Vue → `src/stores/use<Domain>Store.ts` (Pinia, setup-store style).
+- Server data never goes in a store. See the `set-up-state-management` skill, ref `state-boundaries.md`.
+
 ## When to deviate
 
 - **Path alias prefix:** if the project already uses `~/` (Nuxt convention) or `app/` (legacy), keep the existing prefix. Don't churn imports.
