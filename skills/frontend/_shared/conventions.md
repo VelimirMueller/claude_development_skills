@@ -16,7 +16,7 @@ import { Button } from '../../../components/atoms/Button';
 
 ## Rule: source root is `src/`
 **Why:** Matches every modern scaffold (Vite, Next, Nuxt). Avoids debate.
-**How to apply:** All app code lives under `src/`. Tests under `src/tests/` or co-located with subjects (see `folder-conventions.md`). Public assets under `public/`.
+**How to apply:** All app code lives under `src/`. Tests live in a top-level `tests/` tree by type (see `folder-conventions.md`). Public assets under `public/`.
 
 ## Rule: file names match exported identifier
 **Why:** Easier navigation, predictable imports.
@@ -53,6 +53,13 @@ export * from './ErrorFallback';
 **How to apply:**
 - React → `src/hooks/`
 - Vue → `src/composables/`
+
+## Rule: `stores/` holds UI-state stores; one small store per domain
+**Why:** UI state (toggles, selections, filters, theme) is separate from server state, which lives in the TanStack Query cache, not a store. A dedicated folder keeps that boundary visible. One store per domain limits re-render scope and keeps each store readable.
+**How to apply:**
+- React → `src/stores/use<Domain>Store.ts` (Zustand). Example: `useTodoFiltersStore.ts`.
+- Vue → `src/stores/use<Domain>Store.ts` (Pinia, setup-store style).
+- Server data never goes in a store. See the `set-up-state-management` skill, ref `state-boundaries.md`.
 
 ## When to deviate
 

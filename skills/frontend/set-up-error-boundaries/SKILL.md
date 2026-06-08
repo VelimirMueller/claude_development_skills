@@ -40,7 +40,7 @@ Classified as a **molecule**: composes one atom (`ErrorFallback`) with one behav
 ```tsx
 // src/components/molecules/ErrorBoundary/ErrorBoundary.tsx
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { reportError } from '@/libs/error-reporter';
+import { captureError } from '@/libs/error-reporter';
 import { ErrorFallback } from '@/components/atoms/ErrorFallback';
 
 type Props = { children: ReactNode; fallback?: ReactNode };
@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    reportError(error, { componentStack: info.componentStack ?? undefined });
+    captureError(error, { componentStack: info.componentStack ?? undefined });
   }
 
   render() {
@@ -77,14 +77,14 @@ export * from './ErrorBoundary';
 <!-- src/components/molecules/ErrorBoundary/ErrorBoundary.vue -->
 <script setup lang="ts">
 import { ref, onErrorCaptured } from 'vue';
-import { reportError } from '@/libs/error-reporter';
+import { captureError } from '@/libs/error-reporter';
 import ErrorFallback from '@/components/atoms/ErrorFallback/ErrorFallback.vue';
 
 const error = ref<Error | null>(null);
 
 onErrorCaptured((err) => {
   error.value = err as Error;
-  reportError(err as Error, {});
+  captureError(err as Error, {});
   return false; // halt propagation
 });
 </script>
@@ -151,7 +151,7 @@ defineProps<{ error?: Error; onRetry?: () => void }>();
 </template>
 ```
 
-## 6. Generate the logging seam `reportError`
+## 6. Generate the logging seam `captureError`
 
 ```ts
 // src/libs/error-reporter.ts
@@ -165,10 +165,10 @@ type ErrorContext = {
  * Reports an error to the configured logging service.
  * Stub: logs to console. Replace the body when a real logger is wired in.
  */
-export function reportError(error: Error, context: ErrorContext = {}): void {
+export function captureError(error: Error, context: ErrorContext = {}): void {
   // Future logger goes here, e.g.:
   //   Sentry.captureException(error, { contexts: { app: context } });
-  console.error('[reportError]', error, context);
+  console.error('[captureError]', error, context);
 }
 ```
 
@@ -222,7 +222,7 @@ The spec calls for a test that renders a deliberately-throwing component and ass
 Wiring both ends up entangled with the Playwright setup (config, dev-server proxy, page wrappers) that skill `configure-test-stack` (Plan 3) installs. Until that lands, generate a placeholder spec that confirms the page renders without crashing the app-shell boundary — it does NOT yet exercise the catch path:
 
 ```ts
-// src/tests/error-boundary.spec.ts
+// tests/e2e/error-boundary.spec.ts
 // PLACEHOLDER — the real catch-path test arrives with skill `configure-test-stack`.
 // This stub merely confirms the page renders without crashing the app-shell boundary.
 import { test, expect } from '@playwright/test';
