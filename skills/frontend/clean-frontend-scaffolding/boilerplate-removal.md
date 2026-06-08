@@ -7,13 +7,11 @@ Reference for `clean-frontend-scaffolding`. Enumerates every file the Vite scaff
 **How to apply:** Reduce file *content* to a minimal shell rather than deleting the file entirely.
 
 ## Rule: keep `src/index.css` (or `src/style.css`) as the Tailwind entry
-**Why:** Tailwind CLI / `@tailwindcss/vite` consumes one canonical entry stylesheet. Removing it means Tailwind never loads.
-**How to apply:** Replace the file *content* with the three Tailwind directives. Don't delete the file.
+**Why:** The `@tailwindcss/vite` plugin consumes one canonical entry stylesheet. Removing it means Tailwind never loads.
+**How to apply:** Replace the file *content* with the Tailwind v4 import. v4 (the 2026 default) replaced the three `@tailwind` directives with one `@import`, and moved config to CSS-first `@theme` (a future design-system skill owns tokens). Don't delete the file. If the project is pinned to Tailwind v3, keep the three `@tailwind` directives instead — audit the installed major first.
 
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 ```
 
 **Anti-example:**

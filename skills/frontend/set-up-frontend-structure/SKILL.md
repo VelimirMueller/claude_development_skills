@@ -1,6 +1,6 @@
 ---
 name: set-up-frontend-structure
-description: Use when laying down folder structure for a frontend project — creates atomic-design component layout (atoms / molecules / organisms / templates / pages) plus hooks-or-composables, libs, utils, and tests folders, with index.ts barrels and one example component per atomic layer to document the pattern.
+description: Use when laying down folder structure for a frontend project — creates atomic-design component layout (atoms / molecules / organisms / templates / pages) plus hooks-or-composables, libs, and utils folders, with index.ts barrels and one example component (with a story) per atomic layer to document the pattern.
 ---
 
 # Set Up Frontend Structure
@@ -16,7 +16,8 @@ For each folder below, check if it already exists and is non-empty:
 - `src/hooks` (React) **or** `src/composables` (Vue)
 - `src/libs`
 - `src/utils`
-- `src/tests`
+
+(The test tree lives at a top-level `tests/`, created by `configure-test-stack` — not here.)
 
 Detect framework from `package.json` (`react` vs `vue`). The hook-vs-composable folder is framework-specific — see `../_shared/conventions.md`.
 
@@ -42,9 +43,10 @@ src/
 │   └── pages/
 ├── hooks/        (React) OR composables/ (Vue)
 ├── libs/
-├── utils/
-└── tests/
+└── utils/
 ```
+
+(Tests are **not** under `src/`. `configure-test-stack` creates a top-level `tests/{unit,ui,integration,e2e}` tree.)
 
 Drop a `.gitkeep` in each empty folder so git tracks them.
 
@@ -61,7 +63,7 @@ Repeat for molecules, organisms, templates, pages, hooks (or composables), libs,
 
 ## 5. Generate one example per atomic layer
 
-To document the convention, generate a single example component at each layer with matching `*.stories.ts` and `*.test.ts` siblings. The Storybook test runner and Vitest are configured later; the test/story files should compile but won't run yet.
+To document the convention, generate a single example component at each layer with a matching `*.stories.ts` sibling. Tests are **not** co-located — they live in a top-level `tests/` tree created by `configure-test-stack` (ref `test-layout.md`); stories sit beside their component, where the Storybook Vitest addon runs them as tests in place.
 
 ### React example tree
 
@@ -69,19 +71,16 @@ To document the convention, generate a single example component at each layer wi
 src/components/atoms/Button/
 ├── Button.tsx
 ├── Button.stories.ts
-├── Button.test.tsx
 └── index.ts
 
 src/components/molecules/SearchInput/
 ├── SearchInput.tsx
 ├── SearchInput.stories.ts
-├── SearchInput.test.tsx
 └── index.ts
 
 src/components/organisms/Header/
 ├── Header.tsx
 ├── Header.stories.ts
-├── Header.test.tsx
 └── index.ts
 
 src/components/templates/AuthLayout/
@@ -123,20 +122,6 @@ export function Button({ children, ...rest }: ButtonProps) {
 export * from './Button';
 ```
 
-```tsx
-// src/components/atoms/Button/Button.test.tsx
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { Button } from './Button';
-
-describe('Button', () => {
-  it('renders its children', () => {
-    render(<Button>Click me</Button>);
-    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
-  });
-});
-```
-
 ```ts
 // src/components/atoms/Button/Button.stories.ts
 import type { Meta, StoryObj } from '@storybook/react';
@@ -153,7 +138,7 @@ export const Default: StoryObj<typeof Button> = {
 };
 ```
 
-For Vue projects, mirror this structure with `.vue` SFCs and Vue testing-library.
+For Vue projects, mirror this structure with `.vue` SFCs and `.stories.ts` siblings (no co-located tests).
 
 After generating one example per layer, also update each barrel:
 
@@ -168,11 +153,9 @@ export * from './Button';
 pnpm tsc --noEmit
 ```
 
-Expected: 0 errors. The example components compile (test/story imports may resolve but not run yet — that's fine).
+Expected: 0 errors. The example components and their stories compile.
 
-If tests / stories fail to resolve `@testing-library/*` or `@storybook/react`, the deps were not installed in skill `scaffold-frontend-project`. Re-run that skill first.
-
-The spec also calls for verifying that Storybook lists the example components; the Storybook test runner is wired in skill `configure-test-stack` (Plan 3). Until that lands, the type-check above is the available verification.
+If stories fail to resolve `@storybook/*`, the deps weren't installed — run `scaffold-frontend-project` first. The test stack (Vitest browser mode, Playwright, MSW, and the top-level `tests/` tree) is set up separately by `configure-test-stack`.
 
 ## References
 - ./atomic-design.md — methodology, criteria for each layer, anti-patterns.
