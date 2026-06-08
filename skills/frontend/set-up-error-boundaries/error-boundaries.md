@@ -96,8 +96,8 @@ function renderWithErrorBoundary(renderFn) {
 - Dev-only error detail (gated by `import.meta.env.DEV`) — never shown to users in prod.
 
 ## Rule: logging seam, not direct logging
-**Why:** Logging providers come and go (Sentry, LogRocket, Datadog, Honeycomb). A `reportError` indirection means swapping providers is a one-file change, not a codebase-wide find-replace.
-**How to apply:** Boundary calls `reportError(error, info)`. The function lives in `src/libs/error-reporter.ts` and currently logs to console. Future tracking-install skill (Tier 2) replaces the implementation.
+**Why:** Logging providers come and go (Sentry, LogRocket, Datadog, Honeycomb). A `captureError` indirection means swapping providers is a one-file change, not a codebase-wide find-replace.
+**How to apply:** Boundary calls `captureError(error, info)`. The function lives in `src/libs/error-reporter.ts` and currently logs to console. Future tracking-install skill (Tier 2) replaces the implementation.
 
 ## Anti-pattern: one mega-boundary at the root only
 
@@ -109,7 +109,7 @@ Already covered above. The user experience cost is real: a single error in a foo
 componentDidCatch() { /* do nothing — error vanishes */ }
 ```
 
-Production errors that never reach a logger are invisible. Always call `reportError`.
+Production errors that never reach a logger are invisible. Always call `captureError`.
 
 ## Anti-pattern: catching `null`/`undefined` access by adding boundaries
 
@@ -124,18 +124,18 @@ A boundary that's never been exercised is a boundary you can't trust. Test with 
 function Bomb(): never { throw new Error('boom'); }
 
 test('ErrorBoundary catches render-phase errors', () => {
-  // expect the fallback to render and reportError to be called
+  // expect the fallback to render and captureError to be called
 });
 ```
 
 ## Logging integration roadmap
 
-When the project adopts Sentry/LogRocket, replace `reportError`'s body:
+When the project adopts Sentry/LogRocket, replace `captureError`'s body:
 
 ```ts
 import * as Sentry from '@sentry/react';
 
-export function reportError(error: Error, context: ErrorContext = {}): void {
+export function captureError(error: Error, context: ErrorContext = {}): void {
   Sentry.captureException(error, { contexts: { app: context } });
 }
 ```

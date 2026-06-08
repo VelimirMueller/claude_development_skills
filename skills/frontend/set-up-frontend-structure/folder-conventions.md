@@ -11,13 +11,12 @@ Reference for `set-up-frontend-structure`. Naming, barrel patterns, and the Reac
 The skill `set-up-frontend-structure` detects framework and picks the right folder.
 
 ## Rule: each component lives in its own folder
-**Why:** A component, its tests, its stories, and its barrel together — co-located, navigable.
+**Why:** A component, its story, and its barrel together — co-located, navigable. (Tests live in the top-level `tests/` tree, not here — see the tests rule below.)
 **How to apply:**
 ```
 src/components/atoms/Button/
 ├── Button.tsx           # component
-├── Button.test.tsx      # unit/component test
-├── Button.stories.ts    # Storybook
+├── Button.stories.ts    # Storybook (runs as a test via the Storybook Vitest addon)
 └── index.ts             # barrel: export * from './Button'
 ```
 
@@ -25,15 +24,14 @@ src/components/atoms/Button/
 ```
 src/components/atoms/
 ├── Button.tsx           # everything flat
-├── Button.test.tsx
 ├── Card.tsx             # quickly becomes 50 files in one folder
 ```
 
-## Rule: tests are co-located by default; e2e in `src/tests/`
-**Why:** Co-located unit tests stay in sync with the subject. End-to-end tests don't have a single subject — they live separately.
+## Rule: tests live in `tests/` by type; stories stay co-located
+**Why:** A typed top-level `tests/` tree (`unit`, `integration`, `ui`, `e2e`) keeps source folders focused on shipping code and lets each kind run under the right environment. Stories are component documentation, so they sit beside the component — the Storybook Vitest addon runs them as tests in place.
 **How to apply:**
-- `Button.test.tsx` lives next to `Button.tsx`.
-- `src/tests/` holds Playwright e2e specs and the Vitest setup file (`setup.ts`).
+- Tests → `tests/{unit,integration,ui,e2e}/` (see the `configure-test-stack` skill, ref `test-layout.md`).
+- Stories → `Button.stories.ts` next to `Button.tsx`.
 
 ## Rule: `libs/` is for "third-party adapter or wrapper"; `utils/` is for "pure helpers"
 **Why:** Different lifetimes and dependencies. A wrapper around `tanstack/query` belongs to libs because it depends on a third-party. A `formatDate` belongs to utils because it has no external deps.
@@ -60,7 +58,7 @@ export * from './ErrorFallback';
 ## When to deviate
 
 - **`pages/` for route components:** if using a file-based router (Next.js, Nuxt, TanStack Router), the routing layer dictates a `pages/` or `routes/` folder. In that case, the atomic-design `pages/` layer redundantly mirrors that — pick one. The skill audits and asks.
-- **Co-located vs separate test folders:** team preference. Default is co-located. If a project has chosen otherwise, follow what's there.
+- **Test location:** this project's default is the typed top-level `tests/` tree. A team that prefers co-located `*.test.*` can keep them in `src/` — follow what's there; don't churn an established choice.
 
 ## Empty-folder placeholders
 

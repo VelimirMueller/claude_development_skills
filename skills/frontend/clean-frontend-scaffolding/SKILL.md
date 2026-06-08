@@ -54,12 +54,10 @@ If every checked file is already custom, exit early with: "Scaffold cleanup not 
    ```
 
 3. Replace `src/App.css` content with a single comment: `/* Project styles (Tailwind handles most layout). */`
-4. Replace `src/index.css` content with the Tailwind directives only:
+4. Replace `src/index.css` content with the Tailwind v4 import (v4 dropped the three `@tailwind` directives for a single `@import`):
 
    ```css
-   @tailwind base;
-   @tailwind components;
-   @tailwind utilities;
+   @import "tailwindcss";
    ```
 
 5. Delete `src/assets/react.svg` and `public/vite.svg`.

@@ -53,6 +53,16 @@ const u: User = { name: 'V', nickname: undefined };
 const u: User = { name: 'V' };
 ```
 
+## Rule: `verbatimModuleSyntax: true`
+**Why:** Forces explicit `import type` / `export type` for type-only imports, so the emitted JS contains exactly the imports you wrote — no surprise elision, clean tree-shaking, and correct ESM behavior under bundlers like Vite. Replaces the deprecated `importsNotUsedAsValues` / `preserveValueImports`.
+**How to apply:** Always on for Vite/ESM projects. Use inline `import { foo, type Bar }` or a separate `import type { Bar }`.
+
+```ts
+// good
+import { useState, type ReactNode } from 'react';
+import type { User } from '@/models/user';
+```
+
 ## Rule: `baseUrl: "."` + `paths`
 **Why:** Foundation for path aliases. Without `baseUrl`, `paths` doesn't resolve.
 **How to apply:** Always set both together. See `path-aliases.md`.
@@ -81,6 +91,7 @@ const u: User = { name: 'V' };
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
