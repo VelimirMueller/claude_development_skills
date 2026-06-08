@@ -16,7 +16,7 @@ import { Button } from '../../../components/atoms/Button';
 
 ## Rule: source root is `src/`
 **Why:** Matches every modern scaffold (Vite, Next, Nuxt). Avoids debate.
-**How to apply:** All app code lives under `src/`. Tests under `src/tests/` or co-located with subjects (see `folder-conventions.md`). Public assets under `public/`.
+**How to apply:** All app code lives under `src/`. Tests live in a top-level `tests/` tree by type (see `folder-conventions.md`). Public assets under `public/`.
 
 ## Rule: file names match exported identifier
 **Why:** Easier navigation, predictable imports.

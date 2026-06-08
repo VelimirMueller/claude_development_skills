@@ -52,7 +52,7 @@ export default mergeConfig(
     test: {
       environment: 'jsdom',
       globals: true,
-      setupFiles: ['./src/tests/setup.ts'],
+      setupFiles: ['./tests/setup/ui.ts'],
     },
   }),
 );
@@ -78,13 +78,13 @@ export default config;
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './src/tests',
-  globalSetup: require.resolve('./src/tests/global-setup.ts'),
+  testDir: './tests/e2e',
+  globalSetup: require.resolve('./tests/setup/global-setup.ts'),
 });
 ```
 
 ```ts
-// src/tests/global-setup.ts
+// tests/setup/global-setup.ts
 import { register } from 'tsconfig-paths';
 import tsconfig from '../../tsconfig.json' with { type: 'json' };
 

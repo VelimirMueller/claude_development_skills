@@ -2,9 +2,9 @@
 
 Version policy for frontend projects scaffolded by these skills.
 
-## Rule: Node 24 LTS
-**Why:** Latest LTS at time of writing (2026-05). Matches Vercel default. Long-term support window simplifies CI choices.
-**How to apply:** Pin via `.nvmrc` (`24`) and `engines.node` in `package.json` (`>=24.0.0`).
+## Rule: Node — track the active LTS line (24 today)
+**Why:** The active LTS line gets the long support window that simplifies CI choices. Pinning to "whatever LTS is current" rather than a frozen number keeps the policy from going stale; Node 24 is the active LTS in 2026.
+**How to apply:** Pin via `.nvmrc` (the active LTS major — `24` today) and `engines.node` in `package.json` (`>=24.0.0`). Bump both when the next even-numbered LTS lands.
 
 ## Rule: pnpm by default; honor user choice
 **Why:** pnpm has a strict dependency hoisting model that catches "phantom dep" bugs early, plus efficient disk usage via content-addressable store. Defaults matter, but the user's preference matters more.
@@ -14,7 +14,7 @@ Version policy for frontend projects scaffolded by these skills.
 **Why:** Runtime deps benefit from minor-version updates (security, perf). Build/test tooling churn breaks reproducibility — pin to patch only.
 **How to apply:**
 - `react`, `vue`, `@tanstack/react-query`, `@tanstack/vue-query`, `zustand`, `pinia`, etc. → `^X.Y.Z`
-- `vite`, `vitest`, `playwright`, `eslint`, `typescript` → `~X.Y.Z`
+- `vite`, `vitest`, `playwright`, `@biomejs/biome`, `prettier`, `typescript` → `~X.Y.Z`
 
 **Anti-example:**
 ```json

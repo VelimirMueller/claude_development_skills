@@ -2,20 +2,62 @@
 
 Opinionated, audit-aware Claude Code skills for building scalable, maintainable frontend projects.
 
-This plugin captures development knowledge — process and technical, blended — as situation-based skills that Claude loads on demand. Each skill is **idempotent**: it inspects the current project state first and applies only what is missing. The same skill works on a brand-new project and on an existing one being brought up to standard.
+This plugin captures development knowledge — process and technical, blended — as situation-based skills that Claude loads on demand. Each skill is **idempotent**: it inspects the current project state first and applies only what is missing, so the same skill works on a brand-new project and on an existing one being brought up to standard. Skills are **dual-framework** (React 19 / Vue 3) and target Vite single-page apps.
 
 ## Status
 
-**0.1.0 — under construction.** Frontend skills first; infrastructure and backend domains will follow under the same plugin.
+**0.2.0 — the frontend domain is complete (22 skills).** Together they cover a full Vite-SPA lifecycle: bootstrap → language & tooling → structure → state → testing → capabilities → experience → polish. Infrastructure (CI/CD) and backend domains will follow under the same plugin.
 
 ## What's inside
 
-Skills live under `skills/frontend/`. Each skill is a folder containing a `SKILL.md` (the trigger + body Claude sees first) and one or more reference `.md` files for deep-dive rules with rationale.
+Skills live under `skills/frontend/`. Each is a folder with a `SKILL.md` (the trigger + body Claude sees first) and one or more reference `.md` files holding deep-dive rules with rationale. Every skill is audit-first and branches React 19 / Vue 3.
 
-Shared knowledge across multiple frontend skills lives in `skills/frontend/_shared/`:
-- `conventions.md` — canonical project conventions (paths, naming, prefixes).
-- `stack-versions.md` — version policy (Node, package manager, dep version pinning).
-- `glossary.md` — atomic-design term definitions.
+**Bootstrap & tooling**
+- `scaffold-frontend-project` — Vite + TS app (React 19 / Vue 3), pnpm via Corepack, Node LTS, Tailwind v4.
+- `clean-frontend-scaffolding` — strip the Vite demo boilerplate.
+- `configure-typescript` — strict mode + modern flags (`verbatimModuleSyntax`, …) + the `@/` alias everywhere.
+- `validate-env` — Zod-validate `import.meta.env` at startup; one typed `env` object the seams import.
+- `configure-linting` — Biome (lint + import sort) + Prettier (format) + lefthook pre-commit.
+- `set-up-frontend-structure` — atomic-design folders + barrel files.
+
+**State, data & resilience**
+- `set-up-state-management` — TanStack Query (server) + Zustand/Pinia (UI) with a hard boundary, query-key factory, fetch seam.
+- `set-up-error-boundaries` — layered boundaries + a pluggable `captureError` seam.
+- `configure-error-tracking` — wire that seam to Sentry (tracing, masked replay, hidden source maps).
+
+**Testing**
+- `configure-test-stack` — Vitest (unit/integration in Node + UI in real-browser mode) + Storybook stories-as-tests + Playwright e2e + MSW, organized under `tests/{unit,ui,integration,e2e}`.
+
+**Capabilities**
+- `set-up-routing` — TanStack Router / Vue Router: typed routes, lazy splitting, loader↔Query prefetch, guards.
+- `set-up-forms` — React Hook Form / VeeValidate + Zod, schema-first, accessible, submit → mutation.
+- `set-up-auth` — current user as server state, no-`localStorage` tokens, route guards, single-flight refresh.
+- `set-up-i18n` — i18next / vue-i18n, typed keys, lazy locales, `Intl` formatting.
+- `set-up-document-head` — per-route `<title>`/meta/OG + `<html lang>` (a11y + SEO) via TanStack Router head / Unhead.
+- `set-up-feature-flags` — vendor-agnostic OpenFeature seam (`useFlag`), safe defaults, user targeting, flag-gated routes.
+
+**Experience**
+- `set-up-design-system` — Tailwind v4 `@theme` tokens, class-based dark mode, cva primitives.
+- `configure-accessibility` — a11y lint + semantic/focus/reduced-motion conventions + axe in tests.
+- `optimize-performance` — React Compiler, route/code-splitting, bundle budget, Core Web Vitals.
+
+**Polish**
+- `set-up-motion` — native View Transitions + the Motion library, all reduced-motion-gated.
+- `set-up-pwa` — vite-plugin-pwa offline shell + installable, with optional query-cache persistence.
+- `configure-analytics` — provider-agnostic analytics seam + Web Vitals RUM, privacy-first.
+
+Shared knowledge lives in `skills/frontend/_shared/`:
+- `conventions.md` — canonical conventions (`src/` root, `@/` alias, naming, `stores/`).
+- `stack-versions.md` — version policy (Node LTS, pnpm, Biome/Prettier, caret-vs-pinned).
+- `glossary.md` — atomic-design terms + server-state vs UI-state definitions.
+
+## Recommended order
+
+The skills compose front-to-back. A greenfield project runs roughly:
+
+`scaffold-frontend-project` → `clean-frontend-scaffolding` → `configure-typescript` → `validate-env` → `configure-linting` → `set-up-frontend-structure` → `set-up-state-management` → `set-up-error-boundaries` → `configure-test-stack` → `set-up-routing` → `set-up-forms` → `set-up-auth` → … → experience & polish.
+
+Each skill is idempotent, so this is a guide, not a constraint — run any one against an existing project to bring just that concern up to standard.
 
 ## Install (local)
 
