@@ -105,7 +105,7 @@ const { openCount } = useTodoSummary();
 ```
 
 ## 6. Boundary + barrel
-Add the module to its layer's `index.ts` barrel; callers import the barrel (`@/utils`, `@/hooks`), never deep-reach into internals. One module, one responsibility; file name matches the primary export.
+Add the module to its layer's `index.ts` barrel (the layer's single re-export home). Import a module by its path — `@/utils/openTodos`, `@/hooks/useTodoSummary` — and never reach *past* it into another module's private internals. One module, one responsibility; file name matches the primary export.
 
 ## 7. Colocated unit test
 Extraction's payoff — pure logic tests with zero setup:

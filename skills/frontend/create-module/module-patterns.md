@@ -22,8 +22,8 @@ function Summary() {
 **How to apply:** pure + deterministic → `utils/`; wraps a third-party or does IO → `libs/`; stateful/lifecycle → hook/composable; shared client state → store; renders → atomic component.
 
 ## Rule: a module exposes a typed surface; callers never reach past it
-**Why:** Deep imports couple callers to internals, so you can't refactor the inside without breaking the outside.
-**How to apply:** Export a small named surface with explicit types; re-export through the layer's `index.ts` barrel; callers import the barrel.
+**Why:** A module's internals are private. Import its helper files directly and you can't refactor the inside without breaking callers.
+**How to apply:** Export a small named surface with explicit types from the module's main file; callers import that module by its path (`@/utils/openTodos`), never its private internals.
 
 ## Rule: utils are pure by default
 **Why:** Purity makes them tree-shakeable and testable with zero setup — the whole reason to extract.
