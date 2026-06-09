@@ -124,8 +124,9 @@ export const realtime = {
   /** Subscribe to a topic; lazily opens the shared socket. Returns an unsubscribe fn. No-op without VITE_REALTIME_URL. */
   subscribe(topic: string, handler: Handler): () => void {
     if (!REALTIME_URL) return () => {};
-    let set = handlers.get(topic);
-    if (!set) { set = new Set(); handlers.set(topic, set); }
+    const existing = handlers.get(topic);
+    const set = existing ?? new Set<Handler>();   // const capture → narrowed inside the closure on any TS version
+    if (!existing) handlers.set(topic, set);
     set.add(handler);
     if (!socket) connect();
     else if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'subscribe', topic }));
@@ -186,6 +187,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { realtime, type RealtimeStatus } from '@/libs/realtime';
 import { useRealtimeStatusStore } from '@/stores/useRealtimeStatusStore';
 import { queryKeys, TodoSchema } from '@/libs/queryKeys';
+import { captureError } from '@/libs/error-reporter';
 
 export function useRealtimeSync() {
   const queryClient = useQueryClient();
@@ -193,9 +195,11 @@ export function useRealtimeSync() {
 
   useEffect(() => {
     const unsubTodos = realtime.subscribe('todos', (msg) => {
-      const todo = TodoSchema.parse(msg.data);                              // validate wire payload
-      queryClient.setQueryData(queryKeys.todos.detail(todo.id), todo);      // patch entity — instant
-      queryClient.invalidateQueries({ queryKey: queryKeys.todos.lists() }); // server owns list membership/order
+      const result = TodoSchema.safeParse(msg.data);                        // validate wire payload
+      if (!result.success) { captureError(result.error); return; }          // malformed push → report, don't crash
+      const todo = result.data;
+      queryClient.setQueryData(queryKeys.todos.detail(todo.id), todo);       // patch entity — instant
+      queryClient.invalidateQueries({ queryKey: queryKeys.todos.lists() });  // server owns list membership/order
     });
     const unsubStatus = realtime.onStatusChange((status) => {
       useRealtimeStatusStore.getState().setStatus(status);
@@ -216,6 +220,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { realtime, type RealtimeStatus } from '@/libs/realtime';
 import { useRealtimeStatusStore } from '@/stores/useRealtimeStatusStore';
 import { queryKeys, TodoSchema } from '@/libs/queryKeys';
+import { captureError } from '@/libs/error-reporter';
 
 export function useRealtimeSync() {
   const queryClient = useQueryClient();
@@ -226,7 +231,9 @@ export function useRealtimeSync() {
 
   onMounted(() => {
     unsubTodos = realtime.subscribe('todos', (msg) => {
-      const todo = TodoSchema.parse(msg.data);
+      const result = TodoSchema.safeParse(msg.data);
+      if (!result.success) { captureError(result.error); return; }
+      const todo = result.data;
       queryClient.setQueryData(queryKeys.todos.detail(todo.id), todo);
       queryClient.invalidateQueries({ queryKey: queryKeys.todos.lists() });
     });
@@ -241,6 +248,8 @@ export function useRealtimeSync() {
   onUnmounted(() => { unsubTodos(); unsubStatus(); });
 }
 ```
+
+> `captureError` is the seam from `set-up-error-boundaries` (`src/libs/error-reporter.ts`). If that skill hasn't run yet, either run it first or substitute `console.error` in the two bridges above.
 
 ## 8. Wire it at the app root
 
@@ -298,4 +307,5 @@ Realtime e2e (a mock WS server via MSW's `ws` API) is deferred to `configure-tes
 - ../set-up-state-management/SKILL.md — the `queryClient` + `queryKeys` factory this writes through; the server/UI boundary.
 - ../set-up-auth/SKILL.md — how the connection authenticates (cookie on the handshake; token-as-first-frame variant).
 - ../validate-env/SKILL.md — the `env` seam that owns `VITE_REALTIME_URL`.
+- ../set-up-error-boundaries/SKILL.md — the `captureError` seam the bridge reports malformed payloads to.
 - ../_shared/conventions.md — `libs/` seam location, the `stores/` rule, hooks vs composables.
