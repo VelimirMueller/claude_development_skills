@@ -67,7 +67,7 @@ jobs:
       - run: pnpm build
       - run: pnpm exec size-limit
 ```
-Match the script/binary names to your `package.json` (`pnpm test` = Vitest; `size-limit` only if `optimize-performance` wired it — else drop that step).
+Match the script/binary names to your `package.json` (`pnpm test` = Vitest; `size-limit` only if `optimize-performance` wired it — else drop that step). `pnpm/action-setup@v4` reads the pnpm version from `package.json`'s `packageManager` field (set by `scaffold-frontend-project` via Corepack); if that field is absent, pin it with `with: { version: <n> }`.
 
 ## 4. Netlify preview deploys
 Enable in the Netlify UI (Site → Build & deploy → Deploy previews) — Netlify builds a preview per PR automatically, no workflow code. Add the build config to `netlify.toml` (create if absent; `set-up-security-headers` owns the `[[headers]]` block, so merge):
