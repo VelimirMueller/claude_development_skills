@@ -6,6 +6,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.3.0] — 2026-06-09
+
+### Added
+- **`create-module`** — authoring skill that keeps UI components thin by routing new logic to the right layer (utils / libs / hooks / composables / stores) behind a typed boundary, with a decision table, a barrel + colocated-test step, and a graduation rule.
+- **`set-up-security-headers`** — a Content-Security-Policy and standard security headers delivered via Netlify, with `connect-src` wired from the validated env (API + realtime origins), Dependabot dependency hygiene, and an XSS-surface note.
+- **`configure-ci`** — a GitHub Actions pipeline (lint → typecheck → test → build → e2e + bundle budget) that makes "CI is the real gate" literal, plus Netlify preview deploys per pull request.
+- **`_shared/architecture.md`** — a seam map tracing how one `queryClient` threads router → hooks → forms → auth → realtime, with the boundary rules.
+
+### Changed
+- README catalogue adds a "Shipping & security" group and `create-module`; the set now stands at **26 skills**.
+- `plugin.json` version → `0.3.0`.
+
 ## [0.2.1] — 2026-06-09
 
 ### Added
