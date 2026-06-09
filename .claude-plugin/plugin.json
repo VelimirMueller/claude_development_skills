@@ -5,5 +5,18 @@
   "author": {
     "name": "Velimir Mueller",
     "email": "velimir.mueller@googlemail.com"
-  }
+  },
+  "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+  "repository": "https://github.com/VelimirMueller/claude_development_skills",
+  "license": "MIT",
+  "keywords": [
+    "frontend",
+    "react",
+    "vue",
+    "vite",
+    "typescript",
+    "skills",
+    "claude-code",
+    "scaffolding"
+  ]
 }
