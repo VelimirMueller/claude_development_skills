@@ -1,0 +1,15 @@
+{
+  "name": "frontendskills",
+  "description": "Audit-aware, opinionated skills for building scalable, maintainable frontend projects (React 19 / Vue 3).",
+  "owner": {
+    "name": "Velimir Mueller"
+  },
+  "plugins": [
+    {
+      "name": "frontendskills",
+      "source": "./",
+      "description": "Senior frontend judgment as executable, audit-first Claude Code skills. Dual-framework React 19 / Vue 3, full Vite-SPA lifecycle.",
+      "version": "0.3.0"
+    }
+  ]
+}
