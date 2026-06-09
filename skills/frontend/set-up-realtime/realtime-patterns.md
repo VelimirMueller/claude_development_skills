@@ -36,7 +36,7 @@ if (status === 'open' && prev === 'reconnecting') {
 
 ## Rule: validate every wire payload before it touches the cache
 **Why:** A pushed message is untrusted input from the network, exactly like a fetch response. An unvalidated `msg.data` cast to `Todo` puts malformed server data straight into the cache, where it surfaces as a confusing render crash far from the cause.
-**How to apply:** Parse with the same Zod schema the rest of the app uses: `const todo = TodoSchema.parse(msg.data)` before `setQueryData`.
+**How to apply:** Parse with the same Zod schema the rest of the app uses, and route a failure to the `captureError` seam instead of letting it throw inside the socket callback: `const result = TodoSchema.safeParse(msg.data); if (!result.success) { captureError(result.error); return; }` then use `result.data`.
 
 ## Rule: connection status is UI state — and the only state realtime puts in a store
 **Why:** "Are we connected?" is ephemeral client state — no server owns it and you cannot fetch it. That makes it the one genuinely new piece of UI state realtime introduces, and it belongs in a small store, announced accessibly.
