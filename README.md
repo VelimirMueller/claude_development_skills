@@ -110,7 +110,7 @@ description, and every relative reference link resolves.
 
 ## Status
 
-**v0.2.1.** The frontend domain covers a full Vite-SPA lifecycle — bootstrap → language &
+**v0.2.2.** The frontend domain covers a full Vite-SPA lifecycle — bootstrap → language &
 tooling → structure → state → testing → capabilities → experience → polish — in 23 composable
 skills. Infrastructure (CI/CD, a security baseline) and backend domains will follow under the
 same plugin.

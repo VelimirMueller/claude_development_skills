@@ -6,6 +6,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.2.2] — 2026-06-09
+
+### Changed
+- **README rewritten** in an editorial voice, with the skill catalogue as the centrepiece.
+- `plugin.json` version → `0.2.2`.
+
+### Added
+- **`CHANGELOG.md`** (this file) and **`CONTRIBUTING.md`** — the house style and how to add a
+  skill that fits.
+
 ## [0.2.1] — 2026-06-09
 
 ### Added
@@ -19,9 +29,7 @@ bump, a fix to an existing one is a patch.
   deviations.
 
 ### Changed
-- README rewritten (editorial) and updated to register `set-up-realtime` — the set now stands at
-  **23 skills**.
-- `plugin.json` version → `0.2.1`.
+- README registers `set-up-realtime` — the set now stands at **23 skills**.
 
 ## [0.2.0] — 2026-06-08
 
