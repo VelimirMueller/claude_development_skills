@@ -6,7 +6,7 @@ This plugin captures development knowledge — process and technical, blended �
 
 ## Status
 
-**0.2.0 — the frontend domain is complete (22 skills).** Together they cover a full Vite-SPA lifecycle: bootstrap → language & tooling → structure → state → testing → capabilities → experience → polish. Infrastructure (CI/CD) and backend domains will follow under the same plugin.
+**0.2.1 — the frontend domain covers a full Vite-SPA lifecycle (23 skills).** Together they cover a full Vite-SPA lifecycle: bootstrap → language & tooling → structure → state → testing → capabilities → experience → polish. Infrastructure (CI/CD) and backend domains will follow under the same plugin.
 
 ## What's inside
 
@@ -22,6 +22,7 @@ Skills live under `skills/frontend/`. Each is a folder with a `SKILL.md` (the tr
 
 **State, data & resilience**
 - `set-up-state-management` — TanStack Query (server) + Zustand/Pinia (UI) with a hard boundary, query-key factory, fetch seam.
+- `set-up-realtime` — transport-agnostic WebSocket seam (reconnect, offline-aware, no-op without config) that writes live server-push updates into the Query cache (patch entity + invalidate lists, re-sync on reconnect); connection status as the only UI store.
 - `set-up-error-boundaries` — layered boundaries + a pluggable `captureError` seam.
 - `configure-error-tracking` — wire that seam to Sentry (tracing, masked replay, hidden source maps).
 
