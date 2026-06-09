@@ -7,7 +7,7 @@ procedures that inspect what's already in front of them and apply only the senio
 that's missing. Dual-framework **React 19 / Vue 3**, every version-specific claim checked
 against 2026's live tooling.
 
-`23 skills` · `full Vite-SPA lifecycle` · `React 19 / Vue 3` · `MIT`
+`26 skills` · `full Vite-SPA lifecycle` · `React 19 / Vue 3` · `MIT`
 
 ---
 
@@ -42,6 +42,7 @@ Every rule ships with its *when to deviate*. The aim is judgment, not dogma.
 - **`validate-env`** — Zod-validate `import.meta.env` at boot; one typed `env` the seams import.
 - **`configure-linting`** — Biome (lint + import sort) + Prettier (format) + a lefthook pre-commit.
 - **`set-up-frontend-structure`** — atomic-design folders and barrels; tests in `tests/` by type.
+- **`create-module`** — the everyday authoring move: route new logic to the right layer (util/lib/hook/store) behind a typed boundary, keeping UI components thin.
 
 **State, data & resilience**
 - **`set-up-state-management`** — TanStack Query (server) beside Zustand/Pinia (UI), one hard boundary, a typed query-key factory, a `fetcher` seam.
@@ -69,6 +70,10 @@ Every rule ships with its *when to deviate*. The aim is judgment, not dogma.
 - **`set-up-motion`** — native View Transitions + the Motion library, every animation reduced-motion-gated.
 - **`set-up-pwa`** — a `vite-plugin-pwa` offline shell, installable, with optional query-cache persistence.
 - **`configure-analytics`** — a provider-agnostic, privacy-first analytics seam + Web Vitals RUM.
+
+**Shipping & security**
+- **`configure-ci`** — a GitHub Actions gate (lint → typecheck → test → build → e2e + bundle budget) and Netlify preview deploys per PR.
+- **`set-up-security-headers`** — a Content-Security-Policy and security headers via Netlify, dependency hygiene (Dependabot), and the real XSS surface.
 
 ## How it composes
 
@@ -107,13 +112,14 @@ description, and every relative reference link resolves.
 - **[RATIONALE.md](RATIONALE.md)** — the design narrative: every load-bearing decision as *X over Y, for Z*.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the house style, and how to add a skill that fits.
 - **[CHANGELOG.md](CHANGELOG.md)** — what landed, and when.
+- **[skills/frontend/_shared/architecture.md](skills/frontend/_shared/architecture.md)** — the seam map: how one `queryClient` threads the whole app.
 
 ## Status
 
-**v0.2.1.** The frontend domain covers a full Vite-SPA lifecycle — bootstrap → language &
-tooling → structure → state → testing → capabilities → experience → polish — in 23 composable
-skills. Infrastructure (CI/CD, a security baseline) and backend domains will follow under the
-same plugin.
+**v0.3.0.** The frontend domain covers a full Vite-SPA lifecycle — bootstrap → language &
+tooling → structure → state → testing → capabilities → experience → polish → shipping — in 26
+composable skills. CI and a security baseline now ship (Netlify-targeted); deeper infrastructure
+and backend domains will follow under the same plugin.
 
 ## License
 
