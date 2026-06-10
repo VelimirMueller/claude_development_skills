@@ -100,6 +100,8 @@ mid-tier device).
 ```
 
 - Modern format (AVIF/WebP), sized for its largest rendered width — not the original.
+  Bare AVIF accepts a small no-support tail; wrap in `<picture>` with WebP/JPEG
+  `<source>` fallbacks when the audience skews to older browsers.
 - `width`/`height` (or CSS `aspect-ratio`) on **every** image so nothing shifts.
 - No carousel, no video, no JS-gated rendering in the hero. Scripts use `defer` (or
   `type="module"`) and sit below the fold; a public page's JS budget starts at zero
