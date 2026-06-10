@@ -23,8 +23,9 @@ grep -rli "<distinctive phrase>" dist/ build/ .output/ out/ 2>/dev/null
 ```
 
 `0` matches → the content is not in the HTML; non-JS crawlers, scrapers, and answer
-engines see an empty shell. On a public page that is always **finding #1**, before any
+engines see an empty shell. On a public page, that is always **finding #1** — before any
 other optimization. Never infer crawlability from the framework — measure the output.
+(The local-build form lists matching files — no output means zero matches.)
 
 ## Classification signals (when the owner isn't sure)
 
