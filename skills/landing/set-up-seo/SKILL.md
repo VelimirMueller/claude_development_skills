@@ -29,6 +29,8 @@ curl -s "$ORIGIN/robots.txt"; curl -sI "$ORIGIN/sitemap.xml" | head -1
 
 Audit each *template* (home, article, product), not just one URL. Apply only what's
 missing; a conforming page is a no-op.
+(The `-c` counters count matching *lines*, not tags — minified heads collapse to 1 — and
+the patterns assume double-quoted attributes; treat them as presence checks, not totals.)
 
 ## 3. Metadata per page
 
@@ -61,8 +63,9 @@ visible content, never invents it**. Example for an article page:
 </script>
 ```
 
-`FAQPage` only for real, visible FAQ sections — and know its rich-result restriction
-(`./structured-data.md`). Never `HowTo` (deprecated rich result).
+`FAQPage` only for real, visible FAQ sections — its rich result is gone (May 2026), the
+markup still serves answer engines (`./structured-data.md`). Never `HowTo` (deprecated
+rich result).
 
 ## 5. sitemap.xml + robots.txt
 
