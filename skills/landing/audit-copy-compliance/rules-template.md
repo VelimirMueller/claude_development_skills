@@ -6,6 +6,10 @@ categories are generic; the *rules inside them* are placeholders a project repla
 its own law (brand voice, legal counsel's requirements, regulator's rules). Format:
 `../_shared/rubric-convention.md`.
 
+Which categories are knockouts is a project decision — in many jurisdictions required
+legal links (imprint, privacy) are hard blocks too; mark them `[K.O.]` accordingly.
+Imagery compliance is out of scope: this gate reads text.
+
 ## [K.O.] Prohibited claims
 **Rule (replace with yours):** no outcome guarantees — no "guaranteed", "risk-free",
 "cures", "always works"; regulated industries (health, finance, legal) typically prohibit
@@ -44,11 +48,13 @@ unit/currency ("49 €", never "49€"), decimal comma, DD.MM.YYYY dates.
 **Check:** regex for digit+currency without NBSP, wrong decimal separators, wrong date
 order.
 **Violation:** "ab 49€ monatlich"
-**Rewrite:** "ab 49 € monatlich" (with NBSP: `49 € `→ `49&nbsp;€`).
+**Rewrite:** "ab 49 € monatlich" — replace the plain space between number and € with a
+non-breaking space (`&nbsp;` in HTML, U+00A0 in source); rendered, both look alike, so
+check the source.
 
 ## Substantiation
 **Rule (replace with yours):** numbers cite a source or a date; superlatives
 ("the best", "#1") are substantiated or removed.
 **Check:** every statistic and superlative — where is its support, on-page or linked?
 **Violation:** "The most effective treatment on the market."
-**Rewrite:** "Rated 4.9/5 by 1 200 patients (2025 survey)." — or drop the superlative.
+**Rewrite:** "Rated 4.9/5 by 1,200 patients (2025 survey)." — or drop the superlative.

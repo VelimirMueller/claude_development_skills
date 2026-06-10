@@ -39,3 +39,7 @@ Markdown, one criterion per `##` heading. A criterion marked `[K.O.]` in its hea
 knockout: failing it fails the page outright, regardless of the rest. The body states
 **what passes** and **what evidence to quote**. Anything the file says beyond that
 (weights, points, severity tiers) is the project's business — the audit follows the file.
+
+Compliance-style rubrics may shape the body as **Rule / Check / Violation / Rewrite**
+instead — failure-enumerating rather than pass-stating; the procedure follows whatever
+the file's criteria define.

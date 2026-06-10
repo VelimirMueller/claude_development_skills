@@ -57,7 +57,8 @@ outright.
 | 2 | "ab 49€" | Locale formatting — NBSP before € | "ab 49 €" |
 ```
 
-Verdict line: **BLOCK** (any K.O. or unresolved violation) or **PASS**. If the bundled
+Verdict line: **BLOCK** (any K.O. or unresolved violation) or **PASS**. Non-K.O.
+findings block until resolved; K.O. findings can't be waived at all. If the bundled
 template was used, end with the install offer
 (`.claude/rubrics/copy-compliance.md`).
 
