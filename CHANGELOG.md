@@ -6,6 +6,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.4.0] — 2026-06-10
+
+### Added
+- **The landing catalogue** (`skills/landing/`) — five framework-agnostic skills for public pages, auditing built HTML from any stack:
+  - **`build-landing-page`** — one conversion goal per page, the section grammar (hero → social proof → benefits → pricing → FAQ → final CTA), a semantic skeleton, and a hero LCP/CLS budget.
+  - **`set-up-seo`** — the crawlability gate (view-source test), per-page metadata, JSON-LD structured data by page type (with the mid-2026 FAQ-rich-result reality), sitemap.xml + robots.txt (Disallow ≠ noindex), and answer-engine-readable content structure.
+  - **`set-up-lead-capture`** — the destination seam, invisible-first spam defenses (honeypot + per-load time-trap, escalation to Turnstile), consent recorded at capture, double opt-in.
+  - **`audit-content-quality`** — rubric-driven scoring with quoted evidence and knockout criteria; fixes only failed criteria.
+  - **`audit-copy-compliance`** — pre-publish copy gate against a rules file; each violation reported with quoted text, rule, and compliant rewrite.
+- **`landing/_shared/page-types.md`** — the public-page gate (page-level, empirical via the view-source test) and the priority-inversion table (public page: LCP/CLS = ranking + revenue; app surface: INP = UX).
+- **`landing/_shared/rubric-convention.md`** — audit rules as a seam: bundled default, total override via the project's `.claude/rubrics/<topic>.md`, malformed-rubric stop rule, with an install offer.
+
+### Changed
+- Cross-links between the catalogues: `set-up-document-head` (SPA caveat → `landing/set-up-seo`), `set-up-forms` ↔ `set-up-lead-capture`, `optimize-performance` ↔ `landing/build-landing-page`; `frontend/_shared/architecture.md` notes the second catalogue.
+- README catalogue adds "Landing & content pages"; the set now stands at **31 skills**.
+- `plugin.json` / `marketplace.json` → `0.4.0`; descriptions now name both catalogues; keywords add `landing-page`, `seo`, `leads`.
+
 ## [0.3.0] — 2026-06-09
 
 ### Added
