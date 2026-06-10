@@ -7,7 +7,7 @@ procedures that inspect what's already in front of them and apply only the senio
 that's missing. Dual-framework **React 19 / Vue 3**, every version-specific claim checked
 against 2026's live tooling.
 
-`26 skills` · `full Vite-SPA lifecycle` · `React 19 / Vue 3` · `MIT`
+`31 skills` · `Vite-SPA app lifecycle + landing catalogue` · `React 19 / Vue 3` · `MIT`
 
 ---
 
@@ -75,6 +75,18 @@ Every rule ships with its *when to deviate*. The aim is judgment, not dogma.
 - **`configure-ci`** — a GitHub Actions gate (lint → typecheck → test → build → e2e + bundle budget) and Netlify preview deploys per PR.
 - **`set-up-security-headers`** — a Content-Security-Policy and security headers via Netlify, dependency hygiene (Dependabot), and the real XSS surface.
 
+**Landing & content pages (framework-agnostic)**
+- **`build-landing-page`** — one job per page, the section grammar (hero → proof → benefits → pricing → FAQ → final CTA), a semantic skeleton, and a hero LCP/CLS budget.
+- **`set-up-seo`** — the crawlability gate (content in served HTML), per-page metadata, JSON-LD by page type, sitemap + robots, answer-engine-readable structure.
+- **`set-up-lead-capture`** — the destination seam, invisible-first spam defenses (honeypot, time-trap → Turnstile), consent at capture, double opt-in.
+- **`audit-content-quality`** — rubric-driven page scoring with quoted evidence; fixes only the failed criteria. Project rubric at `.claude/rubrics/content-quality.md` overrides the default.
+- **`audit-copy-compliance`** — the pre-publish copy gate: violations with quoted text, the rule broken, and a compliant rewrite. Project rules at `.claude/rubrics/copy-compliance.md`.
+
+These five audit *built HTML* (any stack — Next, Astro, Nuxt, prerendered Vite, plain
+HTML) and gate themselves on the page-level question in
+[`skills/landing/_shared/page-types.md`](skills/landing/_shared/page-types.md): must this
+page be readable without JS?
+
 ## How it composes
 
 The skills interlock front-to-back. A greenfield project runs roughly:
@@ -113,13 +125,16 @@ description, and every relative reference link resolves.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the house style, and how to add a skill that fits.
 - **[CHANGELOG.md](CHANGELOG.md)** — what landed, and when.
 - **[skills/frontend/_shared/architecture.md](skills/frontend/_shared/architecture.md)** — the seam map: how one `queryClient` threads the whole app.
+- **[skills/landing/_shared/page-types.md](skills/landing/_shared/page-types.md)** — the public-page gate and the priority inversion (when LCP is revenue and when it's polish).
 
 ## Status
 
-**v0.3.0.** The frontend domain covers a full Vite-SPA lifecycle — bootstrap → language &
-tooling → structure → state → testing → capabilities → experience → polish → shipping — in 26
-composable skills. CI and a security baseline now ship (Netlify-targeted); deeper infrastructure
-and backend domains will follow under the same plugin.
+**v0.4.0.** Two catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
+lifecycle — bootstrap → language & tooling → structure → state → testing → capabilities →
+experience → polish → shipping — in 26 composable skills. `skills/landing/` adds the public-page
+world in 5 framework-agnostic skills: composition, discoverability, lead capture, and two
+rubric-driven audits whose rules a project can override. Deeper infrastructure and backend
+domains will follow under the same plugin.
 
 ## License
 
