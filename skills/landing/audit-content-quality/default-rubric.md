@@ -30,8 +30,10 @@ Passes when author is named and published/updated dates are visible; health, fin
 legal topics also name a qualified reviewer. Evidence: quote byline/dates.
 
 ## Schema mirrors the page
-Passes when JSON-LD exists, validates, and every value is findable as visible text
-(`../set-up-seo/structured-data.md`). Evidence: the types present + one mirrored value.
+Passes when JSON-LD exists and every value is findable as visible text
+(`../set-up-seo/structured-data.md`); run `validator.schema.org` where available — a
+validation failure is a finding, not a silent pass. Evidence: the types present + one
+mirrored value.
 
 ## Internal links in context
 Passes when ≥2 contextual links connect the page to related pages on the site (hub ↔

@@ -23,6 +23,8 @@ cat .claude/rubrics/content-quality.md 2>/dev/null   # project law, if present
 ```
 
 Present → it is the entire rubric (criteria, knockouts, any points/weights it defines).
+Present but empty — or with no `##` criterion headings — → malformed: report it and
+stop; do not fall through to the default (`../_shared/rubric-convention.md`).
 Absent → use `./default-rubric.md`, and offer the install at the end of the report.
 
 ## 3. Gather the page
@@ -52,7 +54,7 @@ Walk the rubric criterion by criterion:
 |---|---|---|
 | [K.O.] Content in served HTML | PASS | view-source: h1 + body text present |
 | Direct answer up front | FAIL | opening paragraph is a 140-word anecdote; answer arrives in §3 |
-| … | … | … |
+| ... | ... | ... |
 ```
 
 Close with: the failures in fix order (knockouts → cheapest wins → rest), and — if the
