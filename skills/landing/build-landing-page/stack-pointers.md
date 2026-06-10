@@ -4,10 +4,10 @@ Reference for `build-landing-page`. The skill is framework-agnostic — these ar
 "where does this live in your stack" notes, nothing more. Deep stack guidance belongs to
 stack-specific plugins.
 
-- **Next.js (App Router):** title/meta via the Metadata API; hero via `next/image`
-  (`priority` prop sets `fetchpriority` + preload); pages are server-rendered/ISR →
-  crawlable by default. JSON-LD: a `<script type="application/ld+json">` in the page
-  component.
+- **Next.js (App Router):** title/meta via the Metadata API; hero via `next/image` with
+  the `preload` prop on the one LCP image (replaces the deprecated `priority` prop in
+  Next 16); pages are server-rendered/ISR → crawlable by default. JSON-LD: a
+  `<script type="application/ld+json">` in the page component.
 - **Astro:** static-first → crawlable by default; hero via `<Image />`; content
   collections for content-driven pages.
 - **Nuxt:** `useSeoMeta()` for metadata; `<NuxtImg>` for the hero; prerender public
