@@ -45,10 +45,4 @@ A route loader prefetches into the exact cache address a component's hook reads;
 
 ## The second catalogue
 
-`skills/landing/` covers the public-page world — landing pages, marketing and content
-pages — framework-agnostically (audits run on built HTML, not on a toolchain). Its
-cross-cutting logic lives in `skills/landing/_shared/`: `page-types.md` (the
-public-page gate and the LCP/CLS-vs-INP priority inversion) and `rubric-convention.md`
-(project-overridable audit rubrics). The two catalogues meet where an app exposes public
-pages: `set-up-document-head` → `landing/set-up-seo`, `set-up-forms` →
-`landing/set-up-lead-capture`, `optimize-performance` → `landing/build-landing-page`.
+`skills/landing/` covers the public-page world — landing pages, marketing and content pages — framework-agnostically (audits run on built HTML, not on a toolchain). Its cross-cutting logic lives in `skills/landing/_shared/`: `page-types.md` (the public-page gate and the priority inversion (LCP/CLS vs INP)) and `rubric-convention.md` (project-overridable audit rubrics). The two catalogues meet where an app exposes public pages: `set-up-document-head` → `landing/set-up-seo`, `set-up-forms` → `landing/set-up-lead-capture`, `optimize-performance` → `landing/build-landing-page`.
