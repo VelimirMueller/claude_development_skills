@@ -15,12 +15,16 @@ file is the swappable implementation — the same seam philosophy as `fetcher` o
 No merging — two half-rubrics would leave ambiguous which law applies. Override is total
 replacement.
 
+Present but empty — or containing no `##` criterion headings — is a **malformed rubric**:
+report it and stop. Do not fall through to the bundled default (that would silently
+re-merge two laws), and never pass an audit because its law was unreadable.
+
 ## Registered topics
 
 | Topic | Project path | Bundled default |
 |---|---|---|
-| `content-quality` | `.claude/rubrics/content-quality.md` | `audit-content-quality/default-rubric.md` |
-| `copy-compliance` | `.claude/rubrics/copy-compliance.md` | `audit-copy-compliance/rules-template.md` |
+| `content-quality` | `.claude/rubrics/content-quality.md` | `skills/landing/audit-content-quality/default-rubric.md` |
+| `copy-compliance` | `.claude/rubrics/copy-compliance.md` | `skills/landing/audit-copy-compliance/rules-template.md` |
 
 ## The install offer
 
