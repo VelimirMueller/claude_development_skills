@@ -28,16 +28,19 @@ findable as visible text on the page. Write the page first, mirror it second.
 | pages ≥2 levels deep | `BreadcrumbList` |
 | physical / local business | `LocalBusiness` (address, hours) |
 
-## The FAQ caveat (2026 reality)
-Google restricted FAQ *rich results* in 2023 to well-known authoritative government and
-health sites — for everyone else `FAQPage` markup no longer earns the expanded SERP
-listing. It remains valid schema.org, and answer engines still read it. So: mark up real,
-visible FAQs for machine readability; do not add FAQ schema chasing a rich result that
-won't come. (`HowTo` rich results were deprecated entirely — don't ship `HowTo` markup.)
+## The FAQ caveat (as of mid-2026)
+Google restricted FAQ *rich results* to authoritative government and health sites in
+2023, then **dropped them entirely in May 2026** — no site earns the expanded FAQ SERP
+listing anymore, and the FAQ check was removed from the Rich Results Test (June 2026).
+`FAQPage` remains valid schema.org, and answer engines still read clean Q&A. So: mark up
+real, visible FAQs for machine readability; never add FAQ schema chasing a rich result
+that no longer exists. (`HowTo` rich results were deprecated back in 2023 — don't ship
+`HowTo` markup either.)
 
 ## Validation
 - `https://validator.schema.org` — syntax + vocabulary.
-- Google Rich Results Test — eligibility for the types that still have rich results.
+- Google Rich Results Test — eligibility for the types that still have rich results
+  (`Product`, `Article`, `BreadcrumbList`, …); FAQ and HowTo are no longer reported there.
 
 ## When to deviate
 A page with nothing to mark up takes `Organization`/`WebSite` only. Don't force `Product`
