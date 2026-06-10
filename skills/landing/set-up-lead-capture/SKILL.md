@@ -27,7 +27,9 @@ grep -ciE "type=\"checkbox\"[^>]*consent|consent[^>]*checkbox" /tmp/page.html
 
 Findings to look for: forms posting directly to a vendor URL scattered per page (no
 seam), missing labels, no spam defense, no consent checkbox, success state that dumps
-PII into the URL.
+PII into the URL. (As in `../set-up-seo/SKILL.md`: the greps are coarse presence checks on double-quoted
+attributes — the consent pattern will also match prose mentioning consent and checkbox;
+read the page, don't trust the counts.)
 
 ## 3. The form contract
 
@@ -38,12 +40,14 @@ PII into the URL.
          required aria-describedby="lead-email-err">
   <p id="lead-email-err" class="field-error" hidden></p>
 
-  <!-- honeypot: invisible to humans, irresistible to bots -->
-  <div class="hp" aria-hidden="true">
-    <label for="lead-company2">Company</label>
+  <!-- honeypot: bots autofill it; humans never see it. No aria-hidden — it would
+       strand a focusable input in a hidden subtree; the label warns anyone who lands here -->
+  <div class="hp">
+    <label for="lead-company2">Leave this field empty</label>
     <input id="lead-company2" name="company2" type="text" tabindex="-1" autocomplete="off">
   </div>
-  <!-- time-trap: rendered at page build/serve time -->
+  <!-- time-trap: must be stamped per page LOAD (SSR per request, or inline JS) —
+       a build-time value on a static page never trips the check -->
   <input type="hidden" name="form_ts" value="{{render_timestamp}}">
 
   <label class="consent">
@@ -57,13 +61,16 @@ PII into the URL.
 ```
 
 ```css
-.hp { position: absolute; left: -9999px; }   /* off-screen, not display:none */
+.hp { position: absolute; left: -9999px; }   /* off-screen: the laziest bots skip display:none; the field existing is the real trap */
 ```
 
 - Minimal fields — each extra field costs conversions and widens PII. Often email alone.
-- Real `<label>`s and `autocomplete` (WCAG 1.3.5 + mobile keyboards).
-- Error state: inline, per field, announced (`aria-describedby`). Success state: visible
-  confirmation **that says what happens next** ("Check your inbox to confirm").
+- Real `<label>`s; `autocomplete` for WCAG 1.3.5 input purpose, `type="email"` for the
+  right mobile keyboard.
+- Error state: inline, per field, announced (`aria-describedby` — the field-level
+  channel). Success state: the `role="status"` element — the form-level channel —
+  with visible confirmation **that says what happens next** ("Check your inbox to
+  confirm"). One message per channel; don't announce the same thing twice.
 
 ## 4. The destination seam
 
@@ -71,8 +78,9 @@ All forms post to **one** endpoint/handler; the vendor (CRM, list provider, webh
 lives behind it, named in one place. Shapes and trade-offs: `./capture-patterns.md`.
 The handler's contract — whatever implements it:
 
-1. Reject silently (normal success response, record dropped) if `company2` is non-empty
-   or `now − form_ts < 3 s`.
+1. Reject silently (normal success response, record dropped) if `company2` is non-empty,
+   or if `form_ts` is present and `now − form_ts < 3 s`. A missing `form_ts` (JS off on
+   a static page) degrades gracefully — the honeypot still guards.
 2. Validate the email server-side; honest inline error for real mistakes.
 3. Rate-limit by IP.
 4. Store: `{ email, consent: true, consent_text_version, submitted_at, source_page }`.
@@ -80,10 +88,13 @@ The handler's contract — whatever implements it:
 
 ## 5. Spam defenses — escalate, invisible first
 
-Honeypot + time-trap (above) are free and invisible — they go in always. Escalate to
-Cloudflare Turnstile (managed/invisible mode) only when measured spam pressure demands;
-an interactive challenge is the last resort, because every challenge costs real
-conversions. Rationale and rejection etiquette: `./capture-patterns.md`.
+The honeypot is free, invisible, and static-safe — it goes in always. The time-trap
+needs a **per-load** `form_ts` (SSR per request, or a one-line inline script setting
+`Date.now()` on load); on a fully static page a build-time timestamp never trips the
+check, so treat the time-trap as an upgrade where rendering allows, not a given.
+Escalate to Cloudflare Turnstile (managed/invisible mode) only when measured spam
+pressure demands; an interactive challenge is the last resort, because every challenge
+costs real conversions. Rationale and rejection etiquette: `./capture-patterns.md`.
 
 ## 6. Consent + double opt-in
 
@@ -100,7 +111,7 @@ conversions. Rationale and rejection etiquette: `./capture-patterns.md`.
 - Valid submit → success state, record stored with consent fields, confirmation mail
   flow triggers.
 - Fill the hidden `company2` field → normal success response, **no** record.
-- Submit within 3 s of load → no record.
+- Submit within 3 s of load → no record (on per-load `form_ts` setups).
 - Bad email → inline error names the field.
 - View the page with JS disabled: the form is present and labeled (it's in the HTML).
 
