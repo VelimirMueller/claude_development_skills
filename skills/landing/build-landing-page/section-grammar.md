@@ -21,6 +21,16 @@ the genuine claims around it.
 specific numbers ("4 200 teams", "98 % on-time"). Nothing real yet? Omit the section —
 an absent section is neutral; a hollow one is negative.
 
+## Rule: problem/solution mirrors the pain before the turn
+**Why:** A visitor who feels understood keeps reading; a solution pitched before the
+problem reads as noise.
+**How to apply:** State the problem in the visitor's own words (the phrasing they'd type
+into a search box), then make the turn to your approach in one move. One problem, one
+turn — a list of every pain you could solve dilutes all of them.
+
+**Anti-example:** opening with the product's architecture ("our AI-powered platform
+leverages…") before naming what hurts.
+
 ## Rule: features are written as benefits
 **Why:** Visitors buy outcomes, not capabilities.
 **How to apply:** Each item leads with what the visitor gets, then names the mechanism:

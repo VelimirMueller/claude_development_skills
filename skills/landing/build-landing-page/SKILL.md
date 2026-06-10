@@ -21,7 +21,7 @@ Work from the built/served HTML (a URL or a file from `dist/`/`build/`/`out/`):
 
 ```bash
 curl -s "$URL" -o /tmp/page.html        # or cp the built file
-grep -c "<h1" /tmp/page.html                                  # exactly 1?
+grep -ci "<h1" /tmp/page.html                                  # exactly 1?
 grep -oE "<(header|main|section|footer|nav)\b" /tmp/page.html | sort | uniq -c   # landmarks
 grep -oiE "<(img|picture|video)[^>]*" /tmp/page.html | head -5                   # hero media + attrs
 ```
@@ -101,13 +101,14 @@ mid-tier device).
 
 - Modern format (AVIF/WebP), sized for its largest rendered width — not the original.
 - `width`/`height` (or CSS `aspect-ratio`) on **every** image so nothing shifts.
-- No carousel, no video, no JS-gated rendering in the hero. Scripts load `defer` and
-  below the fold; a public page's JS budget starts at zero (`../_shared/page-types.md`).
+- No carousel, no video, no JS-gated rendering in the hero. Scripts use `defer` (or
+  `type="module"`) and sit below the fold; a public page's JS budget starts at zero
+  (`../_shared/page-types.md`).
 
 ## 8. Verify
 
 ```bash
-curl -s "$URL" | grep -c "<h1"          # 1
+curl -s "$URL" | grep -ci "<h1"          # 1
 curl -s "$URL" | grep -ci "fetchpriority"   # ≥1 (the hero image)
 ```
 
