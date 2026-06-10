@@ -1,7 +1,7 @@
 {
   "name": "frontendskills",
-  "version": "0.3.0",
-  "description": "Opinionated, audit-aware skills for building scalable, maintainable frontend (and later infra/backend) projects.",
+  "version": "0.4.0",
+  "description": "Opinionated, audit-aware skills for building scalable, maintainable frontends — the Vite-SPA app lifecycle (React 19 / Vue 3) plus a framework-agnostic landing-page catalogue (composition, SEO, lead capture, rubric-driven audits).",
   "author": {
     "name": "Velimir Mueller",
     "email": "velimir.mueller@googlemail.com"
@@ -17,6 +17,9 @@
     "typescript",
     "skills",
     "claude-code",
-    "scaffolding"
+    "scaffolding",
+    "landing-page",
+    "seo",
+    "leads"
   ]
 }
