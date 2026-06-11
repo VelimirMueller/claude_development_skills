@@ -19,3 +19,4 @@ node_modules/
 .pnpm-store/
 .cache/
 docs
+frontend-book-baseline.md
