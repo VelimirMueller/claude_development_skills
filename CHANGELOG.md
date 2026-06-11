@@ -6,6 +6,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.5.1] — 2026-06-11
+
+### Changed
+- **`write-pull-requests`** — both PR shapes now close with a fixed **Before merge** checklist (Manual review, Smoke tested, Pipeline green), posted unticked and ticked by whoever verified each gate. It survives even the trivial-diff deviation; only bot-bodied PRs go without.
+
+## [0.5.0] — 2026-06-11
+
+### Added
+- **The workflow catalogue** (`skills/workflow/`) — two framework-agnostic skills for delivery: commits and pull requests:
+  - **`write-commit-messages`** — a subject and body any developer from junior to CTO can read and act on.
+  - **`write-pull-requests`** — a bug-fix or feature description reviewers from junior to CTO can follow end to end.
+- **`workflow/_shared/audience.md`** — the shared writing contract: one text for three readers, each with an operational test — the junior follows it without tribal knowledge, the senior finds every claim next to its evidence, the CTO reads outcome and risk in the first lines.
+
+### Changed
+- README catalogue adds "Workflow: commits & pull requests"; the set now stands at **33 skills**.
+- `plugin.json` / `marketplace.json` → `0.5.0`; descriptions add the workflow catalogue; keywords add `commits`, `pull-requests`, `workflow`.
+
 ## [0.4.0] — 2026-06-10
 
 ### Added
