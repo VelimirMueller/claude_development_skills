@@ -9,7 +9,7 @@
       "name": "frontendskills",
       "source": "./",
       "description": "Senior frontend judgment as executable, audit-first Claude Code skills. Vite-SPA app lifecycle (React 19 / Vue 3), a framework-agnostic landing catalogue, and a workflow catalogue — commit messages and pull requests that read from junior to CTO.",
-      "version": "0.5.0"
+      "version": "0.5.1"
     }
   ]
 }
