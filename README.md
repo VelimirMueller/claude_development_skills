@@ -7,7 +7,7 @@ procedures that inspect what's already in front of them and apply only the senio
 that's missing. Dual-framework **React 19 / Vue 3**, every version-specific claim checked
 against 2026's live tooling.
 
-`31 skills` · `Vite-SPA app lifecycle + landing catalogue` · `React 19 / Vue 3` · `MIT`
+`33 skills` · `Vite-SPA app lifecycle + landing + workflow catalogues` · `React 19 / Vue 3` · `MIT`
 
 ---
 
@@ -87,6 +87,15 @@ HTML) and gate themselves on the page-level question in
 [`skills/landing/_shared/page-types.md`](skills/landing/_shared/page-types.md): must this
 page be readable without JS?
 
+**Workflow: commits & pull requests (framework-agnostic)**
+- **`write-commit-messages`** — a subject and body any developer from junior to CTO can read and act on.
+- **`write-pull-requests`** — a bug-fix or feature description reviewers from junior to CTO can follow end to end.
+
+Both write to one contract,
+[`skills/workflow/_shared/audience.md`](skills/workflow/_shared/audience.md): the junior
+can follow the text without tribal knowledge, the senior finds every claim next to its
+evidence, the CTO gets outcome and risk in the first lines.
+
 ## How it composes
 
 The skills interlock front-to-back. A greenfield project runs roughly:
@@ -126,15 +135,18 @@ description, and every relative reference link resolves.
 - **[CHANGELOG.md](CHANGELOG.md)** — what landed, and when.
 - **[skills/frontend/_shared/architecture.md](skills/frontend/_shared/architecture.md)** — the seam map: how one `queryClient` threads the whole app.
 - **[skills/landing/_shared/page-types.md](skills/landing/_shared/page-types.md)** — the public-page gate and the priority inversion (when LCP is revenue and when it's polish).
+- **[skills/workflow/_shared/audience.md](skills/workflow/_shared/audience.md)** — the audience contract: one text the junior can follow, the senior can verify, the CTO can skim.
 
 ## Status
 
-**v0.4.0.** Two catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
+**v0.5.0.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
 lifecycle — bootstrap → language & tooling → structure → state → testing → capabilities →
 experience → polish → shipping — in 26 composable skills. `skills/landing/` adds the public-page
 world in 5 framework-agnostic skills: composition, discoverability, lead capture, and two
-rubric-driven audits whose rules a project can override. Deeper infrastructure and backend
-domains will follow under the same plugin.
+rubric-driven audits whose rules a project can override. `skills/workflow/` adds delivery in 2
+framework-agnostic skills: commit messages and pull-request descriptions written for the junior,
+the senior, and the CTO at once. Deeper infrastructure and backend domains will follow under the
+same plugin.
 
 ## License
 

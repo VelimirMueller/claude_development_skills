@@ -1,6 +1,6 @@
 {
   "name": "frontendskills",
-  "description": "Audit-aware, opinionated skills for scalable frontends: the Vite-SPA app lifecycle (React 19 / Vue 3) and a framework-agnostic landing-page catalogue.",
+  "description": "Audit-aware, opinionated skills for scalable frontends: the Vite-SPA app lifecycle (React 19 / Vue 3), a framework-agnostic landing-page catalogue, and a delivery-workflow catalogue (commits, pull requests).",
   "owner": {
     "name": "Velimir Mueller"
   },
@@ -8,8 +8,8 @@
     {
       "name": "frontendskills",
       "source": "./",
-      "description": "Senior frontend judgment as executable, audit-first Claude Code skills. Vite-SPA app lifecycle (React 19 / Vue 3) plus a framework-agnostic landing catalogue — composition, SEO, lead capture, rubric-driven audits.",
-      "version": "0.4.0"
+      "description": "Senior frontend judgment as executable, audit-first Claude Code skills. Vite-SPA app lifecycle (React 19 / Vue 3), a framework-agnostic landing catalogue, and a workflow catalogue — commit messages and pull requests that read from junior to CTO.",
+      "version": "0.5.0"
     }
   ]
 }
