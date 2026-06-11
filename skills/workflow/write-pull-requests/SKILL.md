@@ -59,6 +59,18 @@ remainder under Notes. Edge cases (refactors, mixed branches): `./pr-patterns.md
 6. **Verification** — commands run and observed output.
 7. **Notes** — tradeoffs, follow-ups, review hints.
 
+Both shapes close with the merge checklist, posted unticked:
+
+```markdown
+## Before merge
+- [ ] Manual review
+- [ ] Smoke tested
+- [ ] Pipeline green
+```
+
+A box is ticked by whoever verified it — the reviewer for the manual read, the author or
+CI for the rest. A pre-ticked box with nothing behind it is decoration, not evidence.
+
 No invented headings, no omissions: content that fits no section goes under Notes or
 stays out. For Verification, run the commands *now* and paste the lines that prove the
 point; anything not run is declared — "Not run: needs staging" — an honest gap beats a
@@ -100,8 +112,8 @@ gh pr view
 ```
 
 Expected: one PR for the branch; six (bug fix) or seven (feature) sections in the fixed
-order — or the repo template's own; every Verification entry is a command plus its
-observed output, not an adjective.
+order, closed by the Before-merge checklist — or the repo template's own; every
+Verification entry is a command plus its observed output, not an adjective.
 
 ## References
 - ./pr-patterns.md — why evidence beats assertion, Problem vs Summary, the shape decision, a filled example, when to deviate.

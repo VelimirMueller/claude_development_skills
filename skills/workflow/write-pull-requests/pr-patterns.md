@@ -10,8 +10,10 @@ sections they displace — a description with a "How to review" heading but no
 Verification tells the reviewer how to check work the author never showed they checked.
 And omissions read as answers: a missing Tests section says "none".
 **How to apply:** Bug fix: Problem, Root cause, Fix, Tests, Verification, Notes.
-Feature: Summary, Problem, Solution, Implementation, Tests, Verification, Notes. Review
-hints belong under Notes; content that fits no section goes there too, or stays out.
+Feature: Summary, Problem, Solution, Implementation, Tests, Verification, Notes. Both
+close with the Before-merge checklist — Manual review, Smoke tested, Pipeline green —
+posted unticked. Review hints belong under Notes; content that fits no section goes
+there too, or stays out.
 When a section is genuinely empty, keep the heading and say why ("Tests: none added —
 Markdown-only repo; the validator is the gate") rather than deleting it.
 **Anti-example:** An unguided feature-PR draft for this repo's `0adc6b7` used Summary /
@@ -141,6 +143,12 @@ The one structural call is fix 3: permitting a failure-enumerating body shape co
 read as loosening the convention for the scoring rubrics. It doesn't — pass-stating
 stays the default and compliance-style files are the named carve-out. Start the review
 at `skills/landing/_shared/rubric-convention.md`.
+
+## Before merge
+
+- [ ] Manual review
+- [ ] Smoke tested
+- [ ] Pipeline green
 ````
 
 ## When to deviate
@@ -150,7 +158,8 @@ at `skills/landing/_shared/rubric-convention.md`.
   for testing, the problem stated before the solution wherever the description begins.
 - **One-line dependency bumps and typo fixes:** seven sections would outweigh the diff.
   Problem and Verification still earn their keep in a line each ("CVE-2026-…" /
-  `$ pnpm audit` output); skip the rest. Bot PRs keep the bot's body.
+  `$ pnpm audit` output); skip the rest — except the Before-merge checklist: review and
+  a green pipeline gate even a one-liner. Bot PRs keep the bot's body.
 - **A draft PR opened only to trigger CI** may stay bare — convert it to a full
   description before requesting review.
 
