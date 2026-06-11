@@ -1,6 +1,6 @@
 {
   "name": "frontendskills",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Opinionated, audit-aware skills for building scalable, maintainable frontends — the Vite-SPA app lifecycle (React 19 / Vue 3), a framework-agnostic landing-page catalogue (composition, SEO, lead capture, rubric-driven audits), and a workflow catalogue for delivery (commit messages and pull requests that read from junior to CTO).",
   "author": {
     "name": "Velimir Mueller",

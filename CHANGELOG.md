@@ -6,6 +6,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.5.1] — 2026-06-11
+
+### Changed
+- **`write-pull-requests`** — both PR shapes now close with a fixed **Before merge** checklist (Manual review, Smoke tested, Pipeline green), posted unticked and ticked by whoever verified each gate. It survives even the trivial-diff deviation; only bot-bodied PRs go without.
+
 ## [0.5.0] — 2026-06-11
 
 ### Added
