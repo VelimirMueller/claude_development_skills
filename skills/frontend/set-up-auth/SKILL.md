@@ -117,7 +117,7 @@ Vue: in `router.beforeEach`, `await queryClient.ensureQueryData(currentUserQuery
 
 ## 8. Transparent refresh (in-memory token strategy)
 
-On a 401, the `fetcher` calls `/auth/refresh` once, retries the original request, and on failure redirects to login. Keep it in the fetcher so call sites never handle expiry — see `auth-patterns.md`.
+On a 401, the `fetcher` calls `/auth/refresh` once, retries the original request, and on failure throws `HttpError(401)` — the guard, not the fetcher, redirects to login. Keep the refresh in the fetcher so call sites never handle expiry — see `auth-patterns.md`.
 
 The code is the `refreshSession` / `retried` part of the auth version in [`../_shared/fetcher.md`](../_shared/fetcher.md). Concurrent 401s share one in-flight refresh promise instead of stampeding, and the original request is retried once. When the refresh fails, the fetcher throws `HttpError(401)`; `currentUserQueryOptions` maps that to `null`, so the guard in step 7 redirects instead of crashing.
 

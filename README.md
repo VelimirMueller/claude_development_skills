@@ -190,7 +190,7 @@ relative `.md` link under `skills/` resolves. CI runs the same script on every p
 
 ## Status
 
-**v0.5.2.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
+**v0.5.3.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
 lifecycle — bootstrap → language & tooling → structure → state → testing → capabilities →
 experience → polish → shipping — in 26 composable skills. `skills/landing/` adds the public-page
 world in 5 framework-agnostic skills: composition, discoverability, lead capture, and two

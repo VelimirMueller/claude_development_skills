@@ -6,6 +6,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.5.3] — 2026-10-02
+
+### Fixed
+- **`set-up-auth`** — `auth-patterns.md` and step 8 said the fetcher clears the user query and redirects on a failed refresh; since 0.5.2 it throws `HttpError(401)`, `currentUserQueryOptions` maps that to `null`, and the route guard redirects. The text now matches the code, and says why the fetcher never navigates.
+
 ## [0.5.2] — 2026-10-02
 
 ### Fixed
