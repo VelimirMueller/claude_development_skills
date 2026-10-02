@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validate plugin structure: manifest, SKILL.md frontmatter, reference link resolution.
+# Validate plugin structure: manifests + version sync, SKILL.md frontmatter, reference link resolution.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -26,6 +26,19 @@ for field in name version description author; do
   jq -e ".$field" "$MANIFEST" >/dev/null || fail "$MANIFEST missing field: $field"
 done
 
+# 1b. Marketplace manifest + one version everywhere
+MARKET=".claude-plugin/marketplace.json"
+[ -f "$MARKET" ] || fail "missing $MARKET"
+jq -e . "$MARKET" >/dev/null || fail "$MARKET is not valid JSON"
+VERSION=$(jq -r .version "$MANIFEST")
+PLUGIN_NAME=$(jq -r .name "$MANIFEST")
+MARKET_VERSION=$(jq -r --arg n "$PLUGIN_NAME" '.plugins[] | select(.name == $n) | .version' "$MARKET")
+[ -n "$MARKET_VERSION" ] && [ "$MARKET_VERSION" != null ] || fail "$MARKET does not list plugin '$PLUGIN_NAME' with a version"
+[ "$MARKET_VERSION" = "$VERSION" ] || fail "$MARKET lists $PLUGIN_NAME at '$MARKET_VERSION', $MANIFEST says '$VERSION'"
+TOP_ENTRY=$(grep -m1 -Eo '^## \[[^]]+\]' CHANGELOG.md || true)
+[ "$TOP_ENTRY" = "## [$VERSION]" ] || fail "CHANGELOG.md top entry is '$TOP_ENTRY', expected '## [$VERSION]'"
+grep -q "^\*\*v$VERSION\.\*\*" README.md || fail "README.md Status does not say '**v$VERSION.**'"
+
 # 2. Skill files
 mapfile -t SKILLS < <(find skills -type f -name SKILL.md 2>/dev/null | sort)
 [ "${#SKILLS[@]}" -gt 0 ] || fail "no SKILL.md files found under skills/"
@@ -45,14 +58,15 @@ for SKILL in "${SKILLS[@]}"; do
   [ "$NAME" = "$FOLDER" ] || fail "$SKILL name '$NAME' does not match folder '$FOLDER'"
 done
 
-# 3. Reference link resolution (relative .md links)
-for SKILL in "${SKILLS[@]}"; do
-  DIR="$(dirname "$SKILL")"
-  mapfile -t REFS < <(grep -Eo '\.{1,2}/[A-Za-z0-9_./-]+\.md' "$SKILL" | sort -u || true)
+# 3. Reference link resolution (relative .md links in every Markdown file under skills/)
+mapfile -t DOCS < <(find skills -type f -name '*.md' | sort)
+for DOC in "${DOCS[@]}"; do
+  DIR="$(dirname "$DOC")"
+  mapfile -t REFS < <(grep -Eo '\.{1,2}/[A-Za-z0-9_./-]+\.md' "$DOC" | sort -u || true)
   for REF in "${REFS[@]}"; do
     TARGET="$DIR/$REF"
-    [ -f "$TARGET" ] || fail "$SKILL references missing file: $REF (resolved to $TARGET)"
+    [ -f "$TARGET" ] || fail "$DOC references missing file: $REF (resolved to $TARGET)"
   done
 done
 
-green "OK: validator passed (${#SKILLS[@]} skills checked)"
+green "OK: validator passed (v$VERSION, ${#SKILLS[@]} skills, ${#DOCS[@]} docs checked)"
