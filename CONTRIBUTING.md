@@ -15,8 +15,10 @@ ideally Claude Code itself to trigger a skill and watch it run. The only gate is
 bash scripts/validate.sh
 ```
 
-It checks that the manifest parses, every `SKILL.md` has a `name` and a `Use when…`
-description, and every reference link resolves. Keep it green; CI treats it as the bar.
+It checks that both manifests parse and share one version with the README Status line and
+the top `CHANGELOG.md` entry, every `SKILL.md` has a `name` and a `Use when…` description, and
+every relative `.md` link under `skills/` resolves. Keep it green: the `validate` workflow in
+`.github/workflows/validate.yml` runs it on every pull request and blocks on failure.
 
 ## Anatomy of a skill
 
@@ -92,6 +94,10 @@ Cross-cutting rules live in `skills/frontend/_shared/` — link there instead of
 - `stack-versions.md` — track the active Node LTS; **caret (`^`) for runtime deps, tilde (`~`)
   for build/test tooling**; pnpm by default, but honour the user's choice.
 - `glossary.md` — atomic-design terms; server-state vs UI-state.
+- `fetcher.md` — the one canonical `fetcher` (base and auth versions).
+
+**A snippet used by more than one skill lives in `_shared/` once, and skills link to it.** Code
+copied into several skills drifts, and a bug in it is taught several times over.
 
 ## Reviewing your own work
 
@@ -112,7 +118,9 @@ committed. Keep work-in-progress planning out of the published tree.
 - **Commits:** conventional style — `feat(skill): …`, `fix(skills): …`, `docs(skills): …`.
 - **Scope:** one concern per PR; keep `validate.sh` green.
 - **Versioning (SemVer):** a new skill is a **minor** bump, a fix to an existing one is a
-  **patch**. Bump `.claude-plugin/plugin.json` and add a `CHANGELOG.md` entry in the same PR.
+  **patch**. Bump both `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, the
+  README Status line, and add a `CHANGELOG.md` entry in the same PR — the validator fails if
+  they disagree.
 
 ## License
 

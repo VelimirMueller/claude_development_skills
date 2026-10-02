@@ -6,6 +6,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.5.2] — 2026-10-02
+
+### Fixed
+- **The `fetcher` seam** (`set-up-state-management`, `set-up-auth`) — the snippet spread `...init` after the merged headers, so any caller `headers` replaced `Content-Type` and the CSRF token; and `...init?.headers` dropped a `Headers` instance or a tuple array. It now builds one `Headers` object from `new Headers(init?.headers)` after spreading `init`; seam defaults never override an explicit caller header.
+- The `fetcher` sets `Content-Type: application/json` only for string bodies (a `FormData` upload keeps its multipart boundary), returns `undefined` on `204 No Content`, and throws a typed `HttpError` with `status`.
+- **`set-up-auth`** — `currentUserQueryOptions` maps a 401 to `null`, so the route guard redirects to `/login` instead of throwing; the refresh request now carries the CSRF header and treats a network error as a failed refresh.
+- `set-up-error-boundaries/error-boundaries.md` — fixed a broken glossary link, found by the wider link check.
+
+### Changed
+- The `fetcher` is defined once in **`frontend/_shared/fetcher.md`** (base and auth versions, audit greps for the pre-0.5.2 snippet); `set-up-state-management`, `set-up-auth`, `validate-env` and `auth-patterns.md` link to it instead of carrying copies.
+- **`scripts/validate.sh`** — also checks `marketplace.json`, that the plugin version agrees across both manifests, the README Status line and `CHANGELOG.md`, and resolves links in every `.md` under `skills/`, not only `SKILL.md`.
+- **CI** — `.github/workflows/validate.yml` runs the validator on every pull request and push to `main`.
+- README — exact install commands (marketplace, local clone, team `settings.json`), the repository vs plugin name, and an illustrative skill run.
+
 ## [0.5.1] — 2026-06-11
 
 ### Changed
