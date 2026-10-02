@@ -34,7 +34,8 @@ function csrfHeader(): Record<string, string> {
   const token = document.cookie.match(/(?:^|; )csrf=([^;]+)/)?.[1];
   return token ? { 'X-CSRF-Token': decodeURIComponent(token) } : {};
 }
-// in the fetcher, for POST/PUT/PATCH/DELETE: headers: { ...csrfHeader(), ...init?.headers }
+// in the fetcher, for POST/PUT/PATCH/DELETE: set it on `new Headers(init?.headers)` unless the
+// caller already did — never spread `init` after the headers. Full code: ../_shared/fetcher.md
 ```
 
 ## When to deviate

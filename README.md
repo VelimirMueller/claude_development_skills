@@ -1,5 +1,7 @@
 # frontendskills
 
+<sub>Repository: `claude_development_skills` · Claude Code plugin and marketplace: `frontendskills`</sub>
+
 **Senior frontend judgment — externalized as Claude Code skills that _execute_.**
 
 Not a template that freezes a snapshot of "best practice," but a set of audit-first
@@ -114,10 +116,57 @@ bring just that concern up to standard.
 
 ## Install
 
-For local Claude Code use. Add this directory as a marketplace path in your Claude Code
-settings; Claude Code auto-discovers every `skills/**/SKILL.md`. A skill announces when it's
-relevant — *"Use when adding state management…"* — and loads only then, so the knowledge costs
-nothing until the moment it's needed.
+In Claude Code, add this repository as a marketplace, then install the plugin from it:
+
+```
+/plugin marketplace add VelimirMueller/claude_development_skills
+/plugin install frontendskills@frontendskills
+```
+
+Working from a local clone instead (to try your own edits):
+
+```
+/plugin marketplace add ./claude_development_skills
+/plugin install frontendskills@frontendskills
+```
+
+For a team, commit the same setup to the project's `.claude/settings.json`, so everyone who
+trusts the folder gets the skills:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "frontendskills": {
+      "source": { "source": "github", "repo": "VelimirMueller/claude_development_skills" }
+    }
+  },
+  "enabledPlugins": { "frontendskills@frontendskills": true }
+}
+```
+
+Claude Code discovers every `skills/**/SKILL.md`. A skill announces when it's relevant —
+*"Use when adding state management…"* — and loads only then, so the knowledge costs nothing
+until the moment it's needed. Update with `/plugin marketplace update frontendskills`.
+
+## What a run looks like
+
+Illustrative: `set-up-state-management` on a fresh `pnpm create vite` React app, after
+`configure-typescript` and `set-up-frontend-structure`. You ask *"add state management"*;
+Claude matches the skill's `Use when` line and works through it:
+
+```text
+1. Audit     no @tanstack/react-query, no zustand, no src/libs/fetcher.ts   → full setup
+2. Framework react 19 detected                                                → React track
+3. Install   pnpm add @tanstack/react-query zustand
+             pnpm add -D @tanstack/react-query-devtools
+4. Seams     src/libs/fetcher.ts  src/libs/queryKeys.ts  src/libs/queryClient.ts
+5. Examples  src/hooks/useTodos.ts  src/hooks/useCreateTodo.ts  src/stores/useTodoFiltersStore.ts
+6. Wire      src/main.tsx → <QueryClientProvider> + devtools in DEV only
+7. Verify    pnpm tsc --noEmit
+```
+
+Run it a second time and step 1 finds everything in place: the skill exits with
+*"State management already in place."* and changes nothing.
 
 ## Validate
 
@@ -125,8 +174,9 @@ nothing until the moment it's needed.
 bash scripts/validate.sh
 ```
 
-Checks that the manifest parses, every `SKILL.md` carries a `name` and a `Use when…`
-description, and every relative reference link resolves.
+Checks that both manifests parse and agree on one version with the README and CHANGELOG,
+every `SKILL.md` carries a `name` matching its folder and a `Use when…` description, and every
+relative `.md` link under `skills/` resolves. CI runs the same script on every pull request.
 
 ## Further reading
 
@@ -134,12 +184,13 @@ description, and every relative reference link resolves.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the house style, and how to add a skill that fits.
 - **[CHANGELOG.md](CHANGELOG.md)** — what landed, and when.
 - **[skills/frontend/_shared/architecture.md](skills/frontend/_shared/architecture.md)** — the seam map: how one `queryClient` threads the whole app.
+- **[skills/frontend/_shared/fetcher.md](skills/frontend/_shared/fetcher.md)** — the one canonical `fetcher`, base and auth versions.
 - **[skills/landing/_shared/page-types.md](skills/landing/_shared/page-types.md)** — the public-page gate and the priority inversion (when LCP is revenue and when it's polish).
 - **[skills/workflow/_shared/audience.md](skills/workflow/_shared/audience.md)** — the audience contract: one text the junior can follow, the senior can verify, the CTO can skim.
 
 ## Status
 
-**v0.5.0.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
+**v0.5.2.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
 lifecycle — bootstrap → language & tooling → structure → state → testing → capabilities →
 experience → polish → shipping — in 26 composable skills. `skills/landing/` adds the public-page
 world in 5 framework-agnostic skills: composition, discoverability, lead capture, and two
