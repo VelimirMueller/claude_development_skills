@@ -555,13 +555,23 @@ export function fakeAdapter(responses: (string | Error)[]): LlmAdapter & { calls
 // src/platform/llm/index.ts
 import { tierOf, type LlmConfig } from './config.js';
 import { loadPrompt } from './prompts.js';
-import { redact } from './redact.js';
+import { redact, type Redacted } from './redact.js';
 import { withRetry } from './retry.js';
 import { inSpan, recordUsage } from './telemetry.js';
 import type { LlmAdapter, LlmRequest, LlmResult, Usage } from './types.js';
 
 export { LlmError } from './types.js';
 export type { LlmRequest, LlmResult } from './types.js';
+
+/** Structured output can quote placeholders: restore walks every field; `generate` re-validates the result against the schema. */
+function restoreDeep(value: unknown, redactions: (Redacted | null)[]): unknown {
+  if (typeof value === 'string') return redactions.reduce((acc, r) => r?.restore(acc) ?? acc, value);
+  if (Array.isArray(value)) return value.map((v) => restoreDeep(v, redactions));
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, restoreDeep(v, redactions)]));
+  }
+  return value;
+}
 
 export interface LlmDeps {
   cfg: LlmConfig;
@@ -603,8 +613,12 @@ export function createLlm({ cfg, adapter: impl, promptsDir }: LlmDeps) {
         );
         const costUsd = cost(res.usage, t.price);
         recordUsage(span, res.usage, costUsd, req.task, res.model, res.stopReason);
-        // restore only runs on string output: a schema result that echoes a placeholder keeps it (the model may quote one).
-        const restored = typeof res.output === 'string' ? redactions.reduce((acc, r) => r?.restore(acc) ?? acc, res.output) : res.output;
+        // structured output is restored field by field and re-validated: a schema result that quotes a placeholder returns the original value.
+        const restored = typeof res.output === 'string'
+          ? redactions.reduce((acc, r) => r?.restore(acc) ?? acc, res.output)
+          : req.schema
+            ? req.schema.parse(restoreDeep(res.output, redactions))
+            : restoreDeep(res.output, redactions);
         return { output: restored as T, usage: res.usage, costUsd, latencyMs: Math.round(performance.now() - started),
           model: res.model, stopReason: res.stopReason };
       },
@@ -705,6 +719,11 @@ describe('llm seam', () => {
     const textReq = { task: req.task, tier: req.tier, prompt: req.prompt, messages: req.messages, maxTokens: req.maxTokens, pii: req.pii };
     const r = await llm.generate(textReq);
     expect(r.output).toBe('Reply to jane@example.com today');
+  });
+  it('restores redacted values in structured output', async () => {
+    const fake = fakeAdapter([JSON.stringify({ summary: 'Reply to [EMAIL_1] today', priority: 2 })]);
+    const r = await makeLlm(fake, cfg).generate(req);
+    expect(r.output).toEqual({ summary: 'Reply to jane@example.com today', priority: 2 });
   });
 });
 

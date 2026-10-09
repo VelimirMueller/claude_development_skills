@@ -286,7 +286,7 @@ from opentelemetry.trace import SpanKind, Status, StatusCode
 from pydantic import BaseModel
 
 from .prompts import load_prompt
-from .redact import redact
+from .redact import Redacted, redact
 from .types import AdapterCall, LlmAdapter, LlmError, Tier, Usage
 
 T = TypeVar("T")
@@ -329,6 +329,19 @@ def _cost(u: Usage, p: dict[str, float]) -> float:
     fresh = u.input_tokens - u.cache_read_tokens - u.cache_write_tokens
     return (fresh * p["inputPerMTok"] + u.cache_read_tokens * p["cacheReadPerMTok"]
             + u.cache_write_tokens * p["cacheWritePerMTok"] + u.output_tokens * p["outputPerMTok"]) / 1_000_000
+
+
+def _restore_deep(value: Any, reds: list[Redacted | None]) -> Any:
+    """Structured output can quote placeholders: walk dicts, lists, tuples and strings so every field gets its original back."""
+    if isinstance(value, str):
+        for r in reds:
+            value = r.restore(value) if r else value
+        return value
+    if isinstance(value, dict):
+        return {k: _restore_deep(v, reds) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return type(value)(_restore_deep(v, reds) for v in value)
+    return value
 
 
 class Llm:
@@ -380,6 +393,8 @@ class Llm:
             if isinstance(out, str):
                 for r in reds:
                     out = r.restore(out) if r else out
+            elif isinstance(out, BaseModel):
+                out = type(out).model_validate(_restore_deep(out.model_dump(), reds))  # re-validate so the result still satisfies the schema
             return LlmResult(out, res.usage, cost, round((time.perf_counter() - started) * 1000), res.model, res.stop_reason)
 
     async def count_tokens(self, req: LlmRequest[T]) -> int:
@@ -504,6 +519,12 @@ async def test_retries_then_gives_up():
     with pytest.raises(LlmError):
         await make(bad, cfg).generate(req())
     assert len(bad.calls) == 1
+
+
+async def test_restores_redacted_values_in_structured_output():
+    fake = Fake([Summary(summary="Mail [EMAIL_1] about the crash", priority=2)])
+    r = await make(fake).generate(req())
+    assert r.output.summary == "Mail jane@example.com about the crash"
 
 
 def test_redact_card():
