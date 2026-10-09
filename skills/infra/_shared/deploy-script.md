@@ -120,6 +120,11 @@ stage="$(mktemp -d)"
 trap 'rm -rf "$DOCKER_CONFIG" "$stage"' EXIT
 printf '%s' "$bundle" | base64 -d >"$stage/bundle.tgz"
 if tar -tvzf "$stage/bundle.tgz" | grep -qv '^[-d]'; then die "bundle holds links or special files"; fi
+# Member names: only stack/ and envs/, no '..' segment, no absolute path. GNU tar already refuses '..',
+# but the guard must not depend on which tar the host ships (a leaked deploy key controls this input).
+members="$(tar -tzf "$stage/bundle.tgz")"
+if grep -Ev '^(stack|envs)(/|$)' <<<"$members" | grep -q .; then die "bundle member outside stack/ or envs/"; fi
+if grep -Eq '(^|/)\.\.(/|$)' <<<"$members"; then die "bundle member path contains .."; fi
 mkdir "$stage/x" && tar -xzf "$stage/bundle.tgz" -C "$stage/x" --no-same-owner --no-same-permissions
 [[ -f "$stage/x/stack/compose.yaml" && -f "$stage/x/envs/$ENVIRONMENT/config.env" ]] || die "bundle lacks stack/compose.yaml or envs/$ENVIRONMENT/config.env"
 cp -R "$stage/x/stack/." "$COMPOSE_DIR/"

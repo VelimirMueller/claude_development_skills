@@ -1,7 +1,7 @@
 # MCP Code
 
 Code for [build-mcp-server](./SKILL.md); reasons in [mcp-patterns.md](./mcp-patterns.md).
-Tested (2026-10-09): TypeScript with `@modelcontextprotocol/server` and `client` 2.3.1, `@modelcontextprotocol/hono` 2.0.2, Zod 4.6.5, `tsc --strict`; the six tests below pass; the stdio entry answered `tools/list` and `tools/call` under the Inspector CLI 2.10.1; the HTTP entry returned `401` with a `resource_metadata` challenge, served the protected-resource metadata, rejected a foreign `Origin` with `403` and served a call with the right token. Python with `mcp` 2.3.0 ran over stdio under the Inspector, and over HTTP with the same `401` challenge and an authenticated call.
+Tested (2026-10-09): TypeScript with `@modelcontextprotocol/server` and `client` 2.3.1, `@modelcontextprotocol/hono` 2.0.2, Zod 4.6.5, `tsc --strict`; the six tests below pass; the stdio entry answered `tools/list` and `tools/call` under the Inspector CLI 2.10.1; the HTTP entry returned `401` with a `resource_metadata` challenge, served the protected-resource metadata, rejected a foreign `Origin` with `403` and served a call with the right token. Python with `mcp` 2.3.0 ran over stdio under the Inspector, and over HTTP with the same `401` challenge and an authenticated call; its `search_tickets` takes the tenant from `get_access_token()` and was unit-tested with an injected token — a call without one returns an error.
 
 ## Server (`src/server.ts`)
 
@@ -222,7 +222,7 @@ describe('tickets server', () => {
 
 ## Python (`mcp` 2.x)
 
-The same read tool with OAuth settings. Types from the Pydantic models become the input and output schemas. Run it with `python src/server.py` (Streamable HTTP, port 8000).
+The same read tool with OAuth settings. Types from the Pydantic models become the input and output schemas. The tenant comes from the verified token: `get_access_token()` reads the `AuthContextMiddleware` context, so the tool works only on the authenticated HTTP transport (a stdio call has no token and gets the error below). Run it with `python src/server.py` (Streamable HTTP, port 8000).
 
 ```python
 # src/server.py
@@ -230,8 +230,10 @@ import time
 from typing import Literal
 
 from mcp.server import MCPServer
+from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
+from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from pydantic import AnyHttpUrl, BaseModel, Field
 
@@ -259,6 +261,13 @@ mcp = MCPServer(
 )
 
 
+TICKETS: list[dict[str, str]] = [
+    {"id": "T-1", "title": "Login fails", "status": "open", "tenant_id": "acme"},
+    {"id": "T-2", "title": "Export stalls", "status": "closed", "tenant_id": "acme"},
+    {"id": "T-3", "title": "Billing cycle stuck", "status": "open", "tenant_id": "globex"},
+]
+
+
 class Ticket(BaseModel):
     id: str
     title: str
@@ -272,9 +281,16 @@ class SearchResult(BaseModel):
 @mcp.tool(annotations=ToolAnnotations(read_only_hint=True, open_world_hint=False))
 def search_tickets(status: Literal["open", "closed"], limit: int = Field(default=10, ge=1, le=20)) -> SearchResult:
     """Find support tickets by status. Returns at most 20 tickets with id, title and status."""
-    # Tenant scoping is omitted for brevity: derive the tenant from the verified token's client_id
-    # (as the TypeScript example does) and filter tickets by it, never from a tool argument.
-    return SearchResult(tickets=[Ticket(id="T-1", title="Login fails", status=status)][:limit])
+    access_token = get_access_token()
+    if access_token is None:
+        raise ToolError("No verified access token on this request; search_tickets is tenant-scoped")
+    tenant_id = access_token.client_id  # from the verified token, never from a tool argument
+    found = [
+        Ticket(id=t["id"], title=t["title"], status=t["status"])
+        for t in TICKETS
+        if t["tenant_id"] == tenant_id and t["status"] == status
+    ]
+    return SearchResult(tickets=found[:limit])
 
 
 if __name__ == "__main__":

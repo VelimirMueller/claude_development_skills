@@ -999,6 +999,7 @@ func TestProtectedRoutesRejectMissingToken(t *testing.T) {
 	for _, r := range protectedRoutes {
 		t.Run(r.method+" "+r.path, func(t *testing.T) {
 			rec := httptest.NewRecorder()
+			// httptest.NewRequestWithContext exists since Go 1.23 (verified with go doc on 1.27.1).
 			newAPI().Handler().ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), r.method, r.path, nil))
 			if rec.Code != http.StatusUnauthorized {
 				t.Fatalf("status = %d, want 401", rec.Code)
