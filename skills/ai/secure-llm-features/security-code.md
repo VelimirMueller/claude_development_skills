@@ -12,6 +12,8 @@ Run it before rendering, and render with a renderer that escapes HTML. With an e
 /**
  * Model output is untrusted input to whatever renders it. Apply before it reaches a browser, terminal or IDE.
  * Defaults: no raw HTML, no images or links to hosts you did not allow, no terminal control sequences.
+ * Heuristic: the regexes are not a markdown parser and `allowed` checks the parsed URL, so a percent-encoded
+ * payload in the path (not the query string) can pass. Pair this with a renderer that blocks raw HTML/URLs.
  */
 // eslint-disable-next-line no-control-regex
 const ANSI = /\u001b\[[0-?]*[ -/]*[@-~]|\u001b\][^\u0007\u001b]*(?:\u0007|\u001b\\)|[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g;
@@ -71,7 +73,8 @@ export function defineTool<I extends z.ZodType, O>(t: {
   };
 }
 
-interface PendingAction { tool: string; summary: string; input: unknown; principal: Principal }
+interface PendingAction { tool: string; summary: string; input: unknown; principal: Principal; expiresAt: number }
+const PENDING_TTL_MS = 5 * 60_000; // confirmations expire: a stale proposal must never run later
 const pending = new Map<string, PendingAction>(); // production: a table with expiry, keyed by id + userId
 
 export type CallResult =
@@ -92,7 +95,7 @@ export function bindTools(p: Principal, tools: Tool[]) {
       if (t.effect === 'write') {
         const actionId = crypto.randomUUID();
         const summary = `${name} ${JSON.stringify(parsed.input)}`;
-        pending.set(actionId, { tool: name, summary, input: parsed.input, principal: p });
+        pending.set(actionId, { tool: name, summary, input: parsed.input, principal: p, expiresAt: Date.now() + PENDING_TTL_MS });
         return { ok: 'needs_confirmation', actionId, summary };
       }
       return { ok: true, value: await t.run(p, parsed.input) };
@@ -100,7 +103,8 @@ export function bindTools(p: Principal, tools: Tool[]) {
     /** Called by your UI/API handler when the user clicks confirm. Never exposed to the model. */
     async confirm(actionId: string): Promise<unknown> {
       const a = pending.get(actionId);
-      if (!a || a.principal.userId !== p.userId) throw new Error('No such pending action');
+      if (!a || a.principal.userId !== p.userId || a.principal.tenantId !== p.tenantId) throw new Error('No such pending action');
+      if (a.expiresAt < Date.now()) { pending.delete(actionId); throw new Error('Confirmation expired'); }
       pending.delete(actionId);
       const t = visible.find((x) => x.name === a.tool);
       if (!t) throw new Error('Tool no longer permitted');
@@ -143,7 +147,12 @@ export class BudgetExceeded extends Error {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-/** Check BEFORE the call with a worst-case estimate; record the real cost AFTER. */
+/**
+ * Check BEFORE the call with a worst-case estimate; record the real cost AFTER.
+ * Soft limit: the check and the add are not atomic, so concurrent calls can all pass the check and
+ * collectively exceed the cap by up to concurrency × worstCaseUsd. Hard enforcement needs a
+ * transactional check-and-reserve in the store.
+ */
 export function userBudget(store: BudgetStore, dailyLimitUsd: number) {
   return {
     async guard<T>(userId: string, worstCaseUsd: number, fn: () => Promise<{ costUsd: number } & T>): Promise<{ costUsd: number } & T> {

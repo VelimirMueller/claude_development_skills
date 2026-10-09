@@ -35,6 +35,12 @@ if (!parsed.success) throw new Error(`Invalid configuration:\n  ${parsed.error.i
 Go (collect every error, then `errors.Join`):
 
 ```go
+get := func(key, def string) string {
+	if v, ok := lookup(key); ok && v != "" {
+		return v
+	}
+	return def
+}
 port, err := strconv.Atoi(get("PORT", "8080"))
 if err != nil || port < 1 || port > 65535 {
 	errs = append(errs, errors.New("PORT: must be an integer from 1 to 65535"))

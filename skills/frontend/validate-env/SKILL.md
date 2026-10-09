@@ -76,7 +76,7 @@ Do the same in `sentry.ts` (`env.VITE_SENTRY_DSN`) and `analytics.ts` (`env.VITE
 
 Add the unit test; it proves the check can fail:
 ```ts
-// tests/unit/env.test.ts (needs configure-test-stack; otherwise run the two checks by hand)
+// tests/unit/env.test.ts (needs configure-test-stack and the `@/` alias from configure-typescript; otherwise run the two checks by hand)
 import { afterEach, expect, test, vi } from 'vitest';
 
 afterEach(() => {
@@ -96,6 +96,7 @@ test('throws at import time with the field name when a variable is invalid', asy
   await expect(import('@/libs/env')).rejects.toThrow(/VITE_API_URL/);
 });
 ```
+`vi.stubEnv` reaches `import.meta.env` only on Vitest versions whose env replacement forwards `process.env` (Vitest 3+); on an older runner the test reads `.env.test` instead, so the "throws" case may not throw. If that happens, assert against the parse function directly instead of the module import.
 ```bash
 pnpm typecheck                 # env is typed from the schema
 pnpm vitest run tests/unit/env.test.ts

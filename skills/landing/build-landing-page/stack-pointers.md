@@ -4,6 +4,9 @@ Reference for `build-landing-page`. The skill is framework-agnostic — these ar
 "where does this live in your stack" notes, nothing more. Deep stack guidance belongs to
 stack-specific plugins.
 
+Only the Next.js 16.4 line below was verified (2026-10-09); the other frameworks' lines are
+unverified — check the framework's current docs before copying an API name.
+
 - **Next.js 16 (App Router):** title/meta via the Metadata API; hero via `next/image` on the one LCP image.
   `priority` is deprecated since Next 16; the docs now say prefer `fetchPriority="high"`
   or `loading="eager"` and use `preload` only when the image must be preloaded from
@@ -21,9 +24,6 @@ stack-specific plugins.
   prerendering or a static host page; see `../set-up-seo/crawlability.md`. In-app head
   management is `skills/frontend/set-up-document-head`.
 - **Plain HTML:** already crawlable; apply the grammar and budget directly.
-
-Verified 2026-10-09 against Next 16.4 docs; the other frameworks' lines are unverified —
-check the framework's current docs before copying an API name.
 
 ## When to deviate
 Pointers rot faster than the rules. If a line here contradicts the framework's current

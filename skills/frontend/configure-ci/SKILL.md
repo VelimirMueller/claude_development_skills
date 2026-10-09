@@ -96,7 +96,7 @@ jobs:
       - run: pnpm build
       - run: pnpm exec size-limit
 ```
-Match script/binary names to `package.json` (`pnpm test` = Vitest; drop `size-limit` unless `optimize-performance` wired it). `pnpm/action-setup` reads the pnpm version from `package.json`'s `packageManager` field (set by `scaffold-frontend-project`); without that field, pin it with `with: { version: <n> }`. Typecheck needs the generated route tree: commit `src/routeTree.gen.ts` (`set-up-routing`), or `pnpm typecheck` fails in a clean checkout. Run `pnpm audit` in `quality` only for production deps: a dev-only advisory should not block a hotfix.
+Match script/binary names to `package.json` (`pnpm test` = Vitest; drop `size-limit` unless `optimize-performance` wired it). `pnpm/action-setup` reads the pnpm version from `package.json`'s `packageManager` field (set by `scaffold-frontend-project`); without that field, pin it with `with: { version: <n> }` — which means editing the `setup/action.yml` snippet above, since it hardcodes no version. Typecheck needs the generated route tree: commit `src/routeTree.gen.ts` (`set-up-routing`), or `pnpm typecheck` fails in a clean checkout. Run `pnpm audit` in `quality` only for production deps: a dev-only advisory should not block a hotfix. `pnpm audit` queries the registry, so make the step non-blocking (`continue-on-error: true`) if the registry is unreliable or requires auth.
 
 ## 4. Preview deploys — branch on `hosting`
 | Profile `hosting` / evidence | Branch |

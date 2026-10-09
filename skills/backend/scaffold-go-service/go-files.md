@@ -406,7 +406,8 @@ func (a *API) Handler() http.Handler {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeProblem(w, r, http.StatusNotFound, "")
 	})
-	return a.recoverer(a.accessLog(mux))
+	// accessLog wraps the recoverer, so a panicking request still gets an access-log line with its 500.
+	return a.accessLog(a.recoverer(mux))
 }
 
 func (a *API) live(w http.ResponseWriter, r *http.Request) {
@@ -472,6 +473,10 @@ func (s *statusRecorder) WriteHeader(code int) {
 	s.status = code
 	s.ResponseWriter.WriteHeader(code)
 }
+
+// Unwrap lets http.ResponseController reach the underlying Flusher and Hijacker
+// when a handler needs streaming or a connection upgrade.
+func (s *statusRecorder) Unwrap() http.ResponseWriter { return s.ResponseWriter }
 
 func (a *API) accessLog(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

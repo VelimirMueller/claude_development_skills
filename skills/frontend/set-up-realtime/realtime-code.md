@@ -45,7 +45,11 @@ function send(frame: { type: 'subscribe' | 'unsubscribe'; topic: string }) {
 }
 
 function connect() {
-  if (!REALTIME_URL || socket || handlers.size === 0) return;
+  if (handlers.size === 0) {
+    setStatus('idle'); // a pending reconnect timer or the 'online' event may fire after the last unsubscribe: reset, don't stay stuck at 'reconnecting'/'offline'
+    return;
+  }
+  if (!REALTIME_URL || socket) return;
   setStatus(attempt === 0 ? 'connecting' : 'reconnecting');
   const ws = new WebSocket(REALTIME_URL); // same-site cookies ride the handshake; the server must check Origin
   socket = ws;

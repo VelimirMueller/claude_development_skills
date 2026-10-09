@@ -79,15 +79,16 @@ export function initAnalytics(): void {
 }
 
 export function trackEvent(name: string, props?: Props): void {
-  if (!started) return;
+  if (!started || !mayTrack()) return; // mayTrack here too: after withdrawal the seam stops preparing payloads, not just the request
   // Plausible custom properties are strings.
   const stringProps = props && Object.fromEntries(Object.entries(props).map(([k, v]) => [k, String(v)]));
   track(name, stringProps ? { props: stringProps } : {});
 }
 
 export function trackPageView(path: string): void {
-  // Path only: query strings carry tokens, emails and search terms.
-  if (started) track('pageview', { url: `${location.origin}${path.split(/[?#]/)[0]}` });
+  // Path only: query strings carry tokens, emails and search terms. The full URL keeps the origin — in a
+  // local/preview run that is localhost:PORT, so do not set VITE_ANALYTICS_DOMAIN with consent granted there.
+  if (started && mayTrack()) track('pageview', { url: `${location.origin}${path.split(/[?#]/)[0]}` });
 }
 
 /** Call from the consent banner (the banner itself is outside this skill). */
@@ -98,8 +99,10 @@ export function setConsent(granted: boolean): void {
     /* storage blocked: the choice lasts for this page view only */
   }
   if (granted) {
+    const wasStarted = started;
     initAnalytics();
-    trackPageView(location.pathname);
+    // The router hook (step 7) fires on the first load too; only fire here when consent is what started the seam.
+    if (!wasStarted) trackPageView(location.pathname);
   }
 }
 ```

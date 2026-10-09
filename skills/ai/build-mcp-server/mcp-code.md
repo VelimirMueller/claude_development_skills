@@ -16,9 +16,6 @@ import * as z from 'zod/v4';
 const MAX_RESULT_CHARS = 20_000;
 
 type Ticket = { id: string; title: string; status: 'open' | 'closed'; tenantId: string };
-const tickets: Ticket[] = [
-  { id: 'T-1', title: 'Login fails', status: 'open', tenantId: 'acme' },
-];
 
 function clip(text: string): string {
   return text.length <= MAX_RESULT_CHARS
@@ -29,6 +26,9 @@ function clip(text: string): string {
 export function createServer(auth?: AuthInfo): McpServer {
   const server = new McpServer({ name: 'tickets', version: '1.0.0' });
   const tenantId = auth?.clientId ?? 'acme'; // derive from the verified token, never from tool input
+  const tickets: Ticket[] = [
+    { id: 'T-1', title: 'Login fails', status: 'open', tenantId: 'acme' },
+  ];
 
   server.registerTool(
     'search_tickets',
@@ -50,6 +50,7 @@ export function createServer(auth?: AuthInfo): McpServer {
         .filter((t) => t.tenantId === tenantId && t.status === status)
         .slice(0, limit)
         .map(({ id, title, status }) => ({ id, title, status }));
+      // structuredContent is bounded by `limit` (≤ 20) and the outputSchema; `clip` guards only the text channel.
       return {
         content: [{ type: 'text', text: clip(JSON.stringify({ tickets: found })) }],
         structuredContent: { tickets: found },
@@ -271,6 +272,8 @@ class SearchResult(BaseModel):
 @mcp.tool(annotations=ToolAnnotations(read_only_hint=True, open_world_hint=False))
 def search_tickets(status: Literal["open", "closed"], limit: int = Field(default=10, ge=1, le=20)) -> SearchResult:
     """Find support tickets by status. Returns at most 20 tickets with id, title and status."""
+    # Tenant scoping is omitted for brevity: derive the tenant from the verified token's client_id
+    # (as the TypeScript example does) and filter tickets by it, never from a tool argument.
     return SearchResult(tickets=[Ticket(id="T-1", title="Login fails", status=status)][:limit])
 
 

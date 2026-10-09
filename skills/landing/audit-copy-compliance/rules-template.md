@@ -24,7 +24,7 @@ sources behind them, so a project can write real rules with counsel:
 | Prices to consumers | PAngV | price shown is the total including VAT; "ab" prices need the base case stated |
 | Environmental claims ("klimaneutral") | Directive (EU) 2024/825 (applies from 2026-09-27; verify the German transposition in UWG) | generic green claims restricted; offset-based neutrality claims banned |
 
-Statutes move; re-verify the section numbers before encoding them as `[K.O.]`.
+Statutes move; re-verify the section numbers before encoding them as `[K.O.]`. This table is illustrative only (last verified 2026-10-09) — a copied citation can be read as current law when it is not. Replace it with counsel-reviewed rules before any real use; never ship it as the project's compliance gate.
 
 ## [K.O.] Prohibited claims
 **Rule (replace with yours):** no outcome guarantees — no "guaranteed", "risk-free",

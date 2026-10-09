@@ -137,11 +137,11 @@ With the GitHub integration, a merge deploys changed functions; with CI, run `su
 TOKEN=$(curl -s "$SUPABASE_URL/auth/v1/token?grant_type=password" -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
   -H 'content-type: application/json' -d '{"email":"owner@example.com","password":"…"}' | jq -r .access_token)
 curl -i "$SUPABASE_URL/functions/v1/create-note" -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
-  -d '{"body":"hi"}'                                                   # expect 401: no user JWT
+  -H 'content-type: application/json' -d '{"body":"hi"}'                   # expect 401: no user JWT
 curl -i "$SUPABASE_URL/functions/v1/create-note" -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
-  -H "Authorization: Bearer $TOKEN" -d '{"body":"hi"}'                 # expect 201 and the row
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' -d '{"body":"hi"}'   # expect 201 and the row
 curl -i "$SUPABASE_URL/functions/v1/create-note" -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
-  -H "Authorization: Bearer $TOKEN" -d '{"body":""}'                   # expect 400 with fieldErrors
+  -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' -d '{"body":""}'     # expect 400 with fieldErrors
 ```
 
 Use the local stack (`http://127.0.0.1:54321`, keys from `supabase status`) first. Expected: 401 (body code `UNUSABLE_CREDENTIAL`: an API key alone never satisfies `auth: 'user'`, whichever header carries it), 201, 400 as annotated; a webhook returns 400 for a bad signature and 200 twice for the same signed event, leaving one row.

@@ -35,6 +35,7 @@ insert into auth.users (id, email) values
   ('22222222-2222-2222-2222-222222222222', 'stranger@example.com');
 
 set local role anon;
+-- anon holds no select grant (revoked in the table's migration): a missing grant raises 42501.
 select throws_ok($$select * from public.notes$$, '42501', null, 'anon cannot read notes');
 
 set local role authenticated;

@@ -47,7 +47,7 @@ infra/
 ```
 Details and every file in [opentofu-patterns.md](./opentofu-patterns.md). In short:
 
-1. **`versions.tf` in every environment root**: `required_version = ">= 1.11"` and a `required_providers` block with the full `source`. Without it OpenTofu looks for `hashicorp/<name>` and fails or, worse, picks a different provider with the same name.
+1. **`versions.tf` in every environment root**: `required_version = "~> 1.12"` (the supported window in step 4; 1.11 and 1.10 are end of life) and a `required_providers` block with the full `source`. Without it OpenTofu looks for `hashicorp/<name>` and fails or, worse, picks a different provider with the same name.
 2. **`backend.tf`**: S3-compatible bucket, one state key per environment, `use_lockfile = true`, versioning on the bucket. Create the bucket once by hand (console or CLI); it is the one resource that cannot manage itself.
 3. **Encryption**: `TF_ENCRYPTION` environment variable with `pbkdf2` key provider and `aes_gcm`, `enforced = true` for state **and** plan. Passphrase from the secret store ([manage-secrets](../manage-secrets/SKILL.md)).
 4. **Lock file**: `tofu providers lock -platform=linux_amd64 -platform=linux_arm64 -platform=darwin_arm64`, committed. CI runs `init -lockfile=readonly`.

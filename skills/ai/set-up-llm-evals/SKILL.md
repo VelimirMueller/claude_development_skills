@@ -70,7 +70,7 @@ Code: [eval-code.md](./eval-code.md). Dataset rules: every case has an `id`, an 
 ## 6. Wire it up
 
 1. Add tasks to the runner: `eval-gate` (`tsx evals/gate.ts <task>-gate`) and `eval-full` (`tsx evals/gate.ts <task>-full --judge`).
-2. CI: run `eval-gate` on every PR that touches `prompts/`, `config/llm.models.json`, `src/platform/llm/` or the feature; run `eval-full` nightly and on release branches. The job needs the API key as a secret, so skip it for fork PRs (no secrets there). Job structure and SHA-pinned actions: [workflow-templates.md](../../infra/set-up-delivery-pipeline/workflow-templates.md).
+2. CI: run `eval-gate` on every PR that touches `prompts/`, `config/llm.models.json`, `src/platform/llm/` or the feature; run `eval-full` nightly and on release branches. The job needs the API key as a secret, so for fork PRs (no secrets available) it is skipped and non-blocking; the deterministic checks still run there through the unit tests (`pnpm vitest run tests/evals.test.ts`, fake adapter, no network). Job structure and SHA-pinned actions: [workflow-templates.md](../../infra/set-up-delivery-pipeline/workflow-templates.md).
 3. Set `EVAL_RECORD=1` on the nightly job so each run appends to `evals/history.jsonl`; the gate compares the next run with the last recorded pass rate.
 4. Add a budget per dataset in `thresholds.json`. The runner stops with an error when spend reaches it.
 

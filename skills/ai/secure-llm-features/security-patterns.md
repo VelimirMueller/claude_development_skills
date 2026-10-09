@@ -4,7 +4,7 @@ Reference for [secure-llm-features](./SKILL.md). Code: [security-code.md](./secu
 
 ## Rule: Authority comes from the principal's token, never from text
 **Why:** Whatever the model is persuaded to ask for, it asks with someone's credentials. If those are a service account's, a prompt injection becomes a privilege escalation. If they are the user's, it can only do what the user could do anyway. (LLM01, LLM03)
-**How to apply:** The request handler builds a `Principal { userId, tenantId, scopes }` from the verified session. Every tool, query and budget check takes the principal as a parameter set by your code. Tool input schemas contain no identity field. Call downstream APIs with the user's token (or an exchanged, narrower one), not a shared key. A tool the token lacks the scope for is not offered to the model, and a call to it returns the same "unknown tool" as a tool that does not exist, so a probe learns nothing.
+**How to apply:** The request handler builds a `Principal { userId, tenantId, scopes }` from the verified session. Every tool, query and budget check takes the principal as a parameter set by your code. Tool input schemas contain no identity field. Call downstream APIs with the user's token (or an exchanged, narrower one), not a shared key. A tool the token lacks the scope for is excluded from the tool schema presented to the model; if the model names it anyway, the call returns the same "unknown tool" error as a tool that does not exist, so a probe learns nothing.
 **Anti-example:** `get_orders({ customerId })`: the model, or text it read, chooses whose orders to fetch.
 
 ## Rule: Untrusted text goes in the user turn, in delimiters, and you assume it works anyway

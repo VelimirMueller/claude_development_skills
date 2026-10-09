@@ -153,7 +153,7 @@ test('the app boots without console errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
-  await expect(page.locator('#root')).not.toBeEmpty();
+  await expect(page.locator('#root, #app')).not.toBeEmpty(); // React mounts to #root, Vue to #app
   expect(errors).toEqual([]);
 });
 ```
@@ -226,7 +226,7 @@ If the profile says `tests-dir` and `src/**/*.test.*` exist, move them to `tests
   }
 }
 ```
-One passing example per project proves the wiring (all three ran green on 2026-10-09):
+One passing example per project proves the wiring (all three pass):
 ```tsx
 // tests/ui/Button.test.tsx  (React; Vue: vitest-browser-vue, same shape)
 import { render } from 'vitest-browser-react';

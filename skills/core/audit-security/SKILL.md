@@ -57,7 +57,7 @@ Ask the user which findings to fix (AskUserQuestion, up to 4 per round, Critical
 ## 7. Verify
 
 ```bash
-gitleaks dir . --no-banner --redact   # or the stack's tool; expected: no leaks found
+gitleaks dir . --no-banner --redact   # current subcommand per its release notes (v8: `dir`; older: `detect --no-git`); expected: no leaks found
 ```
 
 Re-run each scanner you ran in step 4 and the tests you added. Expected: approved findings gone, the report's other findings unchanged, no new findings. State the commands and results. A second run of this skill on the same tree reports the same open items.

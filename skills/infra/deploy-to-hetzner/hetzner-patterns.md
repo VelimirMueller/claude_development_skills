@@ -506,7 +506,7 @@ bootcmd:
 runcmd:
 %{ if data_device != "" ~}
   - [sh, -c, "echo '${data_device} /srv/data ext4 defaults,nofail 0 2' >> /etc/fstab"]
-  - [sh, -c, "for i in $(seq 1 60); do [ -e ${data_device} ] && break; sleep 2; done; systemctl daemon-reload; mount /srv/data"]
+  - [sh, -c, "for i in $(seq 1 60); do [ -e ${data_device} ] && break; sleep 2; done; systemctl daemon-reload; mount /srv/data; findmnt -M /srv/data >/dev/null || { echo 'data volume failed to mount; refusing to put Postgres on the root disk' >&2; exit 1; }"]
 %{ endif ~}
   - [usermod, -aG, docker, deploy]
   - [systemctl, daemon-reload]

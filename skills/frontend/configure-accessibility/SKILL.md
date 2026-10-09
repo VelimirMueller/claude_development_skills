@@ -81,7 +81,7 @@ test('home page has no detectable a11y violations', async ({ page }) => {
   await page.goto('/');
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .analyze();
+    .analyze(); // colour contrast is enabled here: axe's default rules include it, so the jsdom-disabled check runs in this real-browser layer
   expect(violations).toEqual([]);
 });
 ```

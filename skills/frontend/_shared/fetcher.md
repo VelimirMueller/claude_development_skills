@@ -78,6 +78,8 @@ function buildHeaders(init?: RequestInit): Headers {
 }
 
 /** Raw layer: same header rules, returns the Response. For typed clients (openapi-fetch) that pass a Request with an absolute URL. */
+// No retry and no credentials here, so no `input.clone()` and no `credentials: 'include'` — a typed client
+// that needs either (401 refresh, cookie sessions) must use the auth version below instead.
 export function fetchRaw(input: Request): Promise<Response> {
   return fetch(new Request(input, { headers: buildHeaders({ method: input.method, headers: input.headers }) }));
 }

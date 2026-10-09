@@ -153,9 +153,11 @@ class Redacted:
     _map: dict[str, str]
 
     def restore(self, output: str) -> str:
-        for key, value in self._map.items():
-            output = output.replace(key, value)
-        return output
+        # One pass over all placeholder keys; sequential replace would double-replace when a redacted value contains another placeholder.
+        if not self._map:
+            return output
+        pattern = re.compile("|".join(re.escape(key) for key in self._map))
+        return pattern.sub(lambda m: self._map[m.group(0)], output)
 
 
 def redact(text: str) -> Redacted:
@@ -356,6 +358,7 @@ class Llm:
                         lambda: self._adapter.call(AdapterCall(
                             tier["model"], tier["effort"], prompt, messages, req.schema, req.max_tokens, timeout_s, on_text)),
                         span,
+                        0 if on_text is not None else self._cfg["maxRetries"],  # streaming cannot retry: deltas would replay
                     )
             except TimeoutError as err:
                 span.set_attribute("error.type", "timeout")
@@ -386,12 +389,12 @@ class Llm:
                     for m in req.messages]
         return await self._adapter.count_tokens(self._cfg["tiers"][req.tier]["model"], prompt.system, messages)
 
-    async def _with_retry(self, fn: Callable[[], Any], span: trace.Span) -> Any:
-        for attempt in range(self._cfg["maxRetries"] + 1):
+    async def _with_retry(self, fn: Callable[[], Any], span: trace.Span, retries: int) -> Any:
+        for attempt in range(retries + 1):
             try:
                 return await fn()
             except LlmError as err:
-                if not err.retryable or attempt >= self._cfg["maxRetries"]:
+                if not err.retryable or attempt >= retries:
                     raise
                 delay = max(random.random() * min(20.0, 0.5 * 2**attempt), err.retry_after_s or 0)
                 span.add_event("retry", {"attempt": attempt + 1, "error.type": err.kind, "delay_ms": round(delay * 1000)})

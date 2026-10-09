@@ -119,13 +119,13 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libx11-dev libasound2-dev libudev-dev libxkbcommon-x11-0
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2
         with:
           tool: cargo-nextest
       - run: cargo fmt --check
@@ -135,14 +135,14 @@ jobs:
   web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - run: cargo check --target wasm32-unknown-unknown --lib
 ```
-Drop the `web` job on the desktop track. Re-verify action major versions (`git ls-remote --tags --refs <repo>`) when scaffolding. Pin actions to a commit SHA if the [security baseline](../../core/_shared/security-baseline.md) requires it.
+Drop the `web` job on the desktop track. Re-verify action SHAs when scaffolding (`gh api repos/<owner>/<repo>/git/ref/tags/<tag> --jq .object.sha`; a branch pin like `dtolnay/rust-toolchain` resolves to its current commit). Pin actions to a commit SHA — the [security baseline](../../core/_shared/security-baseline.md) requires it.
 
 ## Rule: web builds use a size profile and need no `getrandom` config unless you use `rand`
 **Why:** Release builds optimize for speed; a browser download wants size. On the verify date Bevy 0.20 itself pulled no `getrandom` on `wasm32-unknown-unknown`; a game that adds `rand` does, and then needs the `wasm_js` backend.

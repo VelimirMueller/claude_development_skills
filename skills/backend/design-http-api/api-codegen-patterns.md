@@ -58,6 +58,8 @@ def problem_json_media_type(schema: dict) -> dict:
     """`model=` error responses are documented as application/json; ours are problem+json."""
     for path in schema["paths"].values():
         for op in path.values():
+            if not isinstance(op, dict):
+                continue  # path items also hold non-operation keys (parameters, summary)
             for status, resp in op["responses"].items():
                 content = resp.get("content", {})
                 if status.isdigit() and int(status) >= 400 and "application/json" in content:

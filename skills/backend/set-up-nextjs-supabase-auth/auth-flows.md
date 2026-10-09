@@ -168,13 +168,18 @@ export async function takeNext(siteUrl: string): Promise<string> {
 /**
  * Turns an untrusted `next` value into a same-origin path, or '/'.
  * The URL parser resolves `//evil.com`, `/\evil.com` and tab tricks the way a browser does,
- * so the origin comparison catches all of them.
+ * so the origin comparison catches them. It does not catch `/.//evil.com`: that stays
+ * same-origin while parsing, but its pathname normalises to `//evil.com`, which a browser
+ * then follows as a protocol-relative URL. So the returned path must also start with
+ * exactly one slash.
  */
 export function safeNextPath(raw: string | null | undefined, siteUrl: string): string {
   if (!raw) return '/';
   try {
     const url = new URL(raw, siteUrl);
-    return url.origin === new URL(siteUrl).origin ? `${url.pathname}${url.search}` : '/';
+    if (url.origin !== new URL(siteUrl).origin) return '/';
+    const path = `${url.pathname}${url.search}`;
+    return path.startsWith('//') || path.startsWith('/\\') ? '/' : path;
   } catch {
     return '/';
   }
@@ -369,7 +374,7 @@ describe('safeNextPath', () => {
     expect(safeNextPath('https://app.example.com/notes', SITE)).toBe('/notes');
   });
 
-  it.each(['//evil.com', '/\\evil.com', 'https://evil.com/x', '/\t/evil.com', 'javascript:alert(1)'])(
+  it.each(['//evil.com', '/\\evil.com', '/.//evil.com', '/..//evil.com', 'https://evil.com/x', '/\t/evil.com', 'javascript:alert(1)'])(
     'rejects %j',
     (raw) => {
       expect(safeNextPath(raw, SITE)).toBe('/');
@@ -383,4 +388,4 @@ describe('safeNextPath', () => {
 });
 ```
 
-Run with `pnpm vitest run` (Vitest 5.0.3 passed 7 tests). Action validation is covered by the same pattern: call the action with a `FormData` and assert the returned `ActionResult`. Sign-in, refresh and sign-out are end-to-end tests against `supabase start` (Playwright), not unit tests.
+Run with `pnpm vitest run` (Vitest 5.0.3: 9 tests; `/.//evil.com` was a real bypass found in review on 2026-10-09). Action validation is covered by the same pattern: call the action with a `FormData` and assert the returned `ActionResult`. Sign-in, refresh and sign-out are end-to-end tests against `supabase start` (Playwright), not unit tests.

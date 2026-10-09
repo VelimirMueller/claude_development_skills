@@ -4,7 +4,7 @@ Reference for `clean-frontend-scaffolding`. Enumerates every file the Vite scaff
 
 ## Rule: keep the files other skills name; delete the ones nothing imports
 **Why:** Later skills assume `src/main.tsx`, `src/App.tsx` (or `.vue`) and one entry stylesheet, so those stay and shrink. A file that only the demo imports (`App.css`, the sample assets) has no such caller; keeping it as an empty shell is clutter.
-**How to apply:** Reduce `main`, `App` and the entry stylesheet to a minimal shell. Delete `App.css`, `src/assets/*`, `public/icons.svg`, `HelloWorld.vue`.
+**How to apply:** Reduce `main`, `App` and the entry stylesheet to a minimal shell. Delete `App.css`, `src/assets/*`, `public/icons.svg`, `HelloWorld.vue`. The "entry stylesheet" is `src/index.css` (or `src/style.css`), not `App.css`: `App.css` is deleted outright because nothing imports it once the demo `App` is reduced.
 
 ## Rule: keep `src/index.css` (or `src/style.css`) as the Tailwind entry
 **Why:** The `@tailwindcss/vite` plugin consumes one canonical entry stylesheet. Removing it means Tailwind never loads.

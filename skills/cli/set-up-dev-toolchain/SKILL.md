@@ -48,10 +48,10 @@ Run the live check first (`mise --version`, `npm view pnpm version`, `gh api rep
 
 ```bash
 curl https://mise.run | sh          # or: brew install mise
-mise use node@24 pnpm@12 lefthook@2 actionlint@1   # TypeScript
-mise use go golangci-lint lefthook@2 actionlint@1   # Go
-mise use uv ruff lefthook@2 actionlint@1            # Python
-mise use rust lefthook@2 actionlint@1               # Rust
+mise use node@24 pnpm@12 lefthook@2 actionlint@1 zizmor@1.30.1   # TypeScript
+mise use go golangci-lint lefthook@2 actionlint@1 zizmor@1.30.1   # Go
+mise use uv ruff lefthook@2 actionlint@1 zizmor@1.30.1            # Python
+mise use rust lefthook@2 actionlint@1 zizmor@1.30.1               # Rust
 ```
 
 Install only what step 1 found missing. `mise use` writes `[tools]` into `mise.toml`.
@@ -67,6 +67,8 @@ Install only what step 1 found missing. `mise use` writes `[tools]` into `mise.t
 | typecheck | `tsc --noEmit` | `go build ./...` | — | `cargo check` |
 | test | `vitest run` | `go test ./...` | `uv run pytest` | `cargo test` |
 | build | `tsdown` | `go build ./...` | `uv build` | `cargo build --release` |
+
+`tsc --noEmit` assumes a single tsconfig (the CLI track, built by `tsdown`). A Vite SPA repo has a solution-style tsconfig (`files: []` plus `references`), where `tsc --noEmit` checks zero files — use `tsc -b` there (see the frontend `configure-typescript` skill).
 
 `setup` installs tools, deps and hooks (idempotent). `dev` runs the entry (`node src/cli.ts`, `go run ./cmd/<name>`, `uv run <pkg>`, `cargo run`). `check` runs `lint` + `typecheck` + `test`. `doctor` is one shared script, `mise-tasks/doctor`. `build` declares `sources`/`outputs` so mise can skip it.
 

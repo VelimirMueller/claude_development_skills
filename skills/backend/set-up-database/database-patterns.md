@@ -263,7 +263,7 @@ INSERT INTO orders (id, status) VALUES
 ON CONFLICT (id) DO NOTHING;
 ```
 
-Run it from the task, with a guard so it cannot reach a remote host:
+Run it from the task, with a guard so it cannot reach a remote host (a substring heuristic on the URL, not a security boundary — anything that is not `127.0.0.1` or `localhost` is refused):
 
 ```bash
 case "$DATABASE_URL" in *127.0.0.1*|*localhost*) ;; *) echo "seed refused: not a local database" >&2; exit 1 ;; esac

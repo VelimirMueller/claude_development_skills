@@ -71,7 +71,12 @@ export default {
       return new Response('bad signature', { status: 400 });
     }
 
-    const event = JSON.parse(body) as { id: string; type: string };
+    let event: { id: string; type: string };
+    try {
+      event = JSON.parse(body);
+    } catch {
+      return new Response('invalid payload', { status: 400 }); // a valid signature over garbage bytes
+    }
     const { error } = await ctx.supabaseAdmin
       .from('webhook_events')
       .upsert({ id: event.id, type: event.type }, { onConflict: 'id', ignoreDuplicates: true });

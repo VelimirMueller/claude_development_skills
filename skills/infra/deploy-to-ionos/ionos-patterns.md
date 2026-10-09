@@ -332,7 +332,8 @@ module "host" {
   admin_ssh_public_key  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleExampleExampleExampleExampleExample admin"
   deploy_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleExampleExampleExampleExampleExample deploy"
   image_repo            = "ghcr.io/acme/shop"
-  run_script            = file("${path.module}/../../../ds/run.sh")
+  run_script            = file("${path.module}/../../../deploy/host/run.sh")
+  ssh_allowed_cidrs     = ["0.0.0.0/0"] # open default (hosted CI has no stable range); tighten to a VPN/runner range where possible
 }
 
 provider "ionoscloud" {}

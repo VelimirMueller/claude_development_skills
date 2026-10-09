@@ -213,7 +213,7 @@ CORS_ALLOWED_ORIGINS: z
 `AppDeps` gains `allowedOrigins: string[]`; `main.ts` passes `config.CORS_ALLOWED_ORIGINS`. In `src/app.ts` the edge goes on before any route, so its limits and headers cover everything:
 
 ```ts
-app.use(routeTemplate);
+app.use(routeTemplate); // tracing middleware, not a route; the edge below still covers every route
 applyEdge(app, { allowedOrigins: deps.allowedOrigins });
 ```
 
@@ -324,8 +324,9 @@ func deadline(d time.Duration) middleware {
 	}
 }
 
-// rateLimit keeps one token bucket per key. Buckets are never evicted: for an unbounded key space,
-// limit at the proxy or back the limiter with Redis.
+// rateLimit keeps one token bucket per key, with no eviction: safe only for a bounded key space
+// (here: authenticated principals from a trusted IdP). Keys an attacker can mint (raw IPs,
+// header values) need TTL or LRU eviction, a proxy-side limit, or a Redis-backed limiter.
 func rateLimit(perSecond float64, burst int, key func(*http.Request) string) middleware {
 	var mu sync.Mutex
 	buckets := map[string]*rate.Limiter{}
@@ -676,6 +677,8 @@ class EdgeMiddleware:
             if not started:
                 await _problem(413, "Payload Too Large")(scope, receive, send_with_headers)
         except TimeoutError:
+            # A timeout after the response started can no longer send a 504:
+            # the client keeps the truncated body and the connection closes.
             if not started:
                 await _problem(504, "Gateway Timeout")(scope, receive, send_with_headers)
 
@@ -726,11 +729,15 @@ async def safe_get(
     so the name cannot resolve to something else between the check and the connection (DNS
     rebinding). The TLS handshake and the Host header still use the original name.
     Redirects are not followed: each one is a new URL that needs the same checks.
+    Only the first resolved address is connected to; if it is down, the request fails
+    instead of trying the next validated address.
     """
     parts = urlsplit(url)
     host = parts.hostname or ""
     if parts.scheme != "https" or host not in allowed_hosts:
         raise BlockedDestinationError("https URLs on allow-listed hosts only")
+    if parts.username is not None:
+        raise BlockedDestinationError("userinfo in the URL is not supported")
 
     loop = asyncio.get_running_loop()
     infos = await loop.getaddrinfo(host, parts.port or 443, type=socket.SOCK_STREAM)
@@ -817,10 +824,14 @@ async def _http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
 The limiter lives in `src/svc/transport/documents.py` — keyed per caller, one decorator per route, and `request: Request` in the signature because slowapi needs it:
 
 ```python
+from slowapi.util import get_remote_address
+
+
 def caller_key(request: Request) -> str:
-    return str(
-        request.state.principal.sub
-    )  # set by current_principal; per caller, IPs are shared behind NAT
+    principal = getattr(request.state, "principal", None)
+    if principal is not None:
+        return principal.sub  # set by current_principal; per caller, IPs are shared behind NAT
+    return get_remote_address(request)  # no principal on this request: fall back to the address
 
 
 limiter = Limiter(key_func=caller_key)

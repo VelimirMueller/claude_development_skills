@@ -17,6 +17,7 @@ node = "24"
 pnpm = "12"
 lefthook = "2"
 actionlint = "1"
+zizmor = "1.30.1"
 
 [env]
 _.path = ["{{config_root}}/node_modules/.bin"]
@@ -76,6 +77,9 @@ pre-commit:
     - name: actionlint
       glob: ".github/workflows/*.{yml,yaml}"
       run: mise x -- actionlint {staged_files}
+    - name: zizmor
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: mise x -- zizmor {staged_files}
 
 pre-push:
   jobs:
@@ -96,7 +100,9 @@ bad()  { printf '  FAIL  %s\n' "$1" >&2; fail=1; }
 command -v mise >/dev/null && ok "mise $(mise --version | cut -d' ' -f1)" || bad "mise missing"
 
 # every pinned tool is installed at a version that satisfies mise.toml
-if mise ls --current --missing --quiet 2>/dev/null | grep -q .; then
+if ! mise ls --current --missing --quiet 2>/dev/null; then
+  bad "mise could not list pinned tools (older than the pinned min_version?): run 'mise run setup'"
+elif mise ls --current --missing --quiet 2>/dev/null | grep -q .; then
   bad "tools pinned in mise.toml but not installed: run 'mise run setup'"
 else
   ok "pinned tools installed"
@@ -187,7 +193,7 @@ mise 2026.10.5 · just 1.58.0 · lefthook 2.2.1 (config `min_version: 2.2.0`) ·
 
 **Why:** git hooks run in a bare environment, not your activated shell. The mise shims are not on the hook's `PATH`, so a bare `biome` fails with `biome: command not found`. Verified failure.
 
-**How to apply:** every hook command prefixes the tool with `mise x --` (`mise x -- biome check --write …`). The `mise run check` in `pre-push` already goes through mise, so it needs no prefix.
+**How to apply:** every hook command prefixes the tool with `mise x --` (`mise x -- biome check --write …`). The shims are not on the hook's `PATH`, but the `mise` binary itself is — the installer puts it in `~/.local/bin`, Homebrew in its prefix, both of which the hook shell's `PATH` includes. So `mise run check` in `pre-push` works without a prefix. That is a precondition, not an assumption: if `mise` itself is not on the hook `PATH`, no hook command runs. The doctor script checks `command -v mise`.
 
 **Anti-example:** `run: biome check {staged_files}` in `lefthook.yml` — the commit fails with "command not found" and the developer cannot tell why.
 

@@ -225,7 +225,7 @@ const luhn = (digits: string): boolean => {
 
 export interface Redacted {
   text: string;
-  /** Put the original values back into model output that quotes a placeholder. */
+  /** Put the original values back into model output that quotes a placeholder. A placeholder the model invents (not in the map) is left as-is: it is model text, never recovered PII. */
   restore(output: string): string;
 }
 
@@ -476,7 +476,7 @@ export interface BatchItem<T> {
  * Offline work (evals, backfills, nightly enrichment): 50% cheaper, results within 24 hours, any order.
  * Same rules as the online path: model id from config, output validated locally. Poll sparingly.
  */
-export async function runBatch<T>(apiKey: string, items: BatchItem<T>[], pollMs = 60_000): Promise<Map<string, T | Error>> {
+export async function runBatch<T>(apiKey: string, items: BatchItem<T>[], pollMs = 60_000, maxWaitMs = 24 * 60 * 60_000): Promise<Map<string, T | Error>> {
   const client = new Anthropic({ apiKey });
   const batch = await client.messages.batches.create({
     requests: items.map((i) => ({
@@ -490,8 +490,10 @@ export async function runBatch<T>(apiKey: string, items: BatchItem<T>[], pollMs 
       },
     })),
   });
+  const deadline = Date.now() + maxWaitMs;
   let status = batch;
   while (status.processing_status !== 'ended') {
+    if (Date.now() > deadline) throw new Error(`Batch ${batch.id} did not finish within ${maxWaitMs} ms`);
     await new Promise((r) => setTimeout(r, pollMs));
     status = await client.messages.batches.retrieve(batch.id);
   }
@@ -502,8 +504,14 @@ export async function runBatch<T>(apiKey: string, items: BatchItem<T>[], pollMs 
     if (!item) continue;
     if (r.result.type !== 'succeeded') { out.set(r.custom_id, new Error(`batch item ${r.result.type}`)); continue; }
     const text = r.result.message.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');
-    const parsed = item.schema.safeParse(JSON.parse(text)); // key by custom_id, never by position
-    out.set(r.custom_id, parsed.success ? parsed.data : new Error('invalid_output'));
+    let value: T;
+    try {
+      value = item.schema.parse(JSON.parse(text)); // key by custom_id, never by position; malformed JSON is invalid_output too
+    } catch {
+      out.set(r.custom_id, new Error('invalid_output'));
+      continue;
+    }
+    out.set(r.custom_id, value);
   }
   return out;
 }
@@ -585,15 +593,17 @@ export function createLlm({ cfg, adapter: impl, promptsDir }: LlmDeps) {
         promptName: prompt.name, promptVersion: prompt.version, maxTokens: req.maxTokens, streaming: onText !== undefined },
       async (span) => {
         const started = performance.now();
+        // Streaming cannot retry: a retry re-invokes the adapter and replays deltas already delivered to onText.
         const res = await withRetry(
           () => impl.call({ model: t.model, effort: t.effort, prompt, messages, ...(req.schema ? { schema: req.schema } : {}),
             maxTokens: req.maxTokens, signal, ...(onText ? { onText } : {}) }),
-          { maxRetries: cfg.maxRetries, baseMs: 500, capMs: 20_000 },
+          { maxRetries: onText ? 0 : cfg.maxRetries, baseMs: 500, capMs: 20_000 },
           signal,
           (attempt, err, delay) => span.addEvent('retry', { attempt, 'error.type': err.kind, delay_ms: Math.round(delay) }),
         );
         const costUsd = cost(res.usage, t.price);
         recordUsage(span, res.usage, costUsd, req.task, res.model, res.stopReason);
+        // restore only runs on string output: a schema result that echoes a placeholder keeps it (the model may quote one).
         const restored = typeof res.output === 'string' ? redactions.reduce((acc, r) => r?.restore(acc) ?? acc, res.output) : res.output;
         return { output: restored as T, usage: res.usage, costUsd, latencyMs: Math.round(performance.now() - started),
           model: res.model, stopReason: res.stopReason };
@@ -692,7 +702,8 @@ describe('llm seam', () => {
   });
   it('restores redacted values in text output', async () => {
     const llm = makeLlm(fakeAdapter(['Reply to [EMAIL_1] today']), cfg);
-    const r = await llm.generate({ ...req, schema: undefined as never });
+    const textReq = { task: req.task, tier: req.tier, prompt: req.prompt, messages: req.messages, maxTokens: req.maxTokens, pii: req.pii };
+    const r = await llm.generate(textReq);
     expect(r.output).toBe('Reply to jane@example.com today');
   });
 });

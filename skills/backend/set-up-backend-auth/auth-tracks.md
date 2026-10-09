@@ -419,6 +419,7 @@ describe('route protection', () => {
       for (const method of Object.keys(methods)) {
         const key = `${method.toUpperCase()} ${path}`;
         if (PUBLIC.has(key)) continue;
+        // Templated params are filled with a UUID: every path parameter in this app is one.
         const url = path.replace(/\{[^}]+\}/g, '5b1d6f0e-3f77-4f3e-9d6a-1f6f2b1c9a10');
         const res = await app.request(url, { method: method.toUpperCase() });
         if (res.status !== 401) unprotected.push(`${key} -> ${res.status}`);
@@ -744,11 +745,11 @@ if rec.status == http.StatusUnauthorized || rec.status == http.StatusForbidden {
 a.deps.Log.Log(r.Context(), level, "request", /* same attributes as before */)
 ```
 
-`main.go` builds the verifier once. `oidc.NewRemoteKeySet` fetches lazily, so startup does not depend on the IdP:
+`main.go` builds the verifier once. `oidc.NewRemoteKeySet` fetches lazily, so startup does not depend on the IdP. It keeps the context it is given and uses it for every later JWKS fetch, so pass a process-lifetime context, never one tied to startup or signals:
 
 ```go
 verifier := auth.NewVerifier(auth.Config{
-	Keys:        oidc.NewRemoteKeySet(ctx, cfg.OIDCJWKSURL),
+	Keys:        oidc.NewRemoteKeySet(context.Background(), cfg.OIDCJWKSURL),
 	Issuer:      cfg.OIDCIssuer,
 	Audience:    cfg.OIDCAudience,
 	TenantClaim: cfg.OIDCTenantClaim,
@@ -981,7 +982,9 @@ class Verifier:
         self._tenant_claim = tenant_claim
 
     def verify(self, token: str) -> Principal:
-        """Blocking: PyJWKClient fetches the JWKS over urllib. Call it from a sync dependency."""
+        """Blocking: PyJWKClient fetches the JWKS over urllib; call it from a sync dependency.
+        Keys are cached for 600 s (see remote_keys), so only the first request per new key
+        pays the fetch — size the threadpool for a concurrent key rotation."""
         key = self._keys.get_signing_key_from_jwt(token).key
         claims = jwt.decode(
             token,
@@ -1114,6 +1117,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Path, Request
 from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from svc.platform.auth import CurrentPrincipal, current_principal
@@ -1130,9 +1134,10 @@ problem = {"model": Problem, "content": {PROBLEM_CONTENT_TYPE: {}}}
 
 
 def caller_key(request: Request) -> str:
-    return str(
-        request.state.principal.sub
-    )  # set by current_principal; per caller, IPs are shared behind NAT
+    principal = getattr(request.state, "principal", None)
+    if principal is not None:
+        return principal.sub  # set by current_principal; per caller, IPs are shared behind NAT
+    return get_remote_address(request)  # no principal on this request: fall back to the address
 
 
 limiter = Limiter(key_func=caller_key)
@@ -1290,7 +1295,7 @@ class TestIdp:
         return jwt.encode(claims, self._private, algorithm="ES256", headers={"kid": "test"})
 ```
 
-The route-protection test (in `tests/unit/test_app.py`) walks the generated OpenAPI document:
+The route-protection test (in `tests/unit/test_app.py`, with `import re`) walks the generated OpenAPI document:
 
 ```python
 async def test_every_operation_outside_the_public_list_requires_a_token(
@@ -1305,7 +1310,7 @@ async def test_every_operation_outside_the_public_list_requires_a_token(
             key = f"{method.upper()} {path}"
             if key in public:
                 continue
-            url = path.replace("{doc_id}", "5b1d6f0e-3f77-4f3e-9d6a-1f6f2b1c9a10")
+            url = re.sub(r"\{[^}]+\}", "5b1d6f0e-3f77-4f3e-9d6a-1f6f2b1c9a10", path)
             status = (await client.request(method.upper(), url)).status_code
             if status != 401:
                 unprotected.append(f"{key} -> {status}")

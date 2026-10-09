@@ -268,7 +268,11 @@ cleanup() { docker rm -f "$name" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
 docker run -d --name "$name" -e POSTGRES_PASSWORD=drill "$PG_IMAGE" >/dev/null
-until docker exec "$name" pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
+for i in $(seq 1 60); do
+  docker exec "$name" pg_isready -U postgres >/dev/null 2>&1 && break
+  [ "$i" -eq 60 ] && { echo "restore drill: Postgres did not become ready in 60s" >&2; exit 1; }
+  sleep 1
+done
 docker run --rm -i --env-file "$ENV_FILE" "$RESTIC_IMAGE" dump latest app.dump \
   | docker exec -i "$name" pg_restore --username postgres --dbname postgres --no-owner --exit-on-error
 docker exec "$name" psql -U postgres -tA -c "$CHECK_SQL"

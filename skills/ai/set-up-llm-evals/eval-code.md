@@ -80,6 +80,8 @@ export async function runEval(o: RunOptions) {
   let spent = 0;
   let passed = 0;
   for (const c of o.cases) {
+    // Budget is a soft floor checked between cases: one subject or judge call may push `spent` past the cap,
+    // and the stop happens before the next case. Judge costs are added to `spent` but not pre-checked on their own.
     if (spent >= o.budgetUsd) throw new Error(`Eval budget exhausted at $${spent.toFixed(4)} after ${passed}/${o.cases.length} passes; raise it deliberately`);
     const sub = await o.subject(c.input);
     spent += sub.costUsd;
@@ -158,7 +160,7 @@ const thresholds = JSON.parse(readFileSync(join(root, 'evals/thresholds.json'), 
 };
 const historyFile = join(root, 'evals/history.jsonl');
 const history = existsSync(historyFile) ? readFileSync(historyFile, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l)) : [];
-const baseline = history.filter((h) => h.dataset === name).at(-1)?.passRate as number | undefined;
+const baseline = history.filter((h) => h.dataset === name).slice(-1)[0]?.passRate as number | undefined;
 
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const summary = await runEval({

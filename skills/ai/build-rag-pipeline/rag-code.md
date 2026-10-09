@@ -238,7 +238,7 @@ export async function withTenant<T>(pool: Pool, tenantId: string, fn: (c: PoolCl
     await c.query('commit');
     return result;
   } catch (err) {
-    await c.query('rollback');
+    await c.query('rollback').catch(() => {}); // rollback must not mask the original error
     throw err;
   } finally {
     c.release();
@@ -263,6 +263,8 @@ export async function upsertDocument(
      returning id`, [doc.tenantId, doc.sourceUri, doc.title, hash]);
   const docId: string = up.rows[0].id;
   await c.query('delete from rag_chunks where document_id = $1', [docId]); // cascades to rag_embeddings
+  // Row-by-row inserts keep the tenant transaction open; for large documents embed before the transaction
+  // and batch chunks + embeddings with a multi-row insert or COPY.
   for (const [i, k] of doc.chunks.entries()) {
     const ins = await c.query(
       'insert into rag_chunks (document_id, tenant_id, ord, heading_path, content, token_count) values ($1,$2,$3,$4,$5,$6) returning id',
