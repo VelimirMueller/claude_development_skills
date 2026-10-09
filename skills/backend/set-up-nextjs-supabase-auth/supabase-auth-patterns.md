@@ -22,15 +22,20 @@ An unexpired access token stays valid after its session was revoked (signed out 
 
 ## Rule: one server client per request, never in module scope
 **Why:** The client closes over that request's cookies. A shared instance mixes sessions between users, or serves a stale one.
-**How to apply:** `createClient()` is async and called inside each DAL function, action, route handler and the proxy helper. The browser client is a singleton by design (`createBrowserClient`), so calling its factory repeatedly is cheap.
+**How to apply:** `createClient()` is async and called inside each DAL function, action, route handler and the proxy helper. There is no browser client for auth: sign-in, sign-out and the PKCE exchange are Server Actions and route handlers, so JavaScript never touches a token.
 
 ## Rule: nothing that carries a session may be publicly cached
 **Why:** A response that sets a refreshed session cookie, if cached by a CDN or ISR, signs the next visitor in as someone else. `setAll` hands you the headers (`Cache-Control`, `Expires`, `Pragma`) that prevent it.
 **How to apply:** Apply those headers in the proxy (and on any redirect it returns). Do not put `Cache-Control: public` or `s-maxage` on routes that call `getViewer()`. With Cache Components, `cookies()` is request-time data, so such routes stream behind `<Suspense>` and are not part of a shared cache; cached components get the cookie-less client only ([nextjs-caching-patterns.md](../build-nextjs-backend/nextjs-caching-patterns.md)).
 
-## Rule: know that the session cookie is readable by JavaScript
-**Why:** `@supabase/ssr` sets `httpOnly: false`, `sameSite: 'lax'`, `path: '/'`, `maxAge` of 400 days by default (read from the package source), because the browser client reads the session from the same cookies. An XSS bug can read the tokens, which is the opposite of the preference in [set-up-auth](../../frontend/set-up-auth/SKILL.md) for httpOnly cookies. The trade is deliberate in the library; the app has to compensate.
-**How to apply:** Ship a strict Content-Security-Policy ([set-up-security-headers](../../frontend/set-up-security-headers/SKILL.md)), no `dangerouslySetInnerHTML` with untrusted input, and `secure` cookies in production (HTTPS). If the app never creates a browser Supabase client (no Realtime, no client-side queries), pass `cookieOptions: { httpOnly: true }` to the server and proxy clients so scripts cannot read the session; this option exists in `@supabase/ssr` and was not exercised end to end here. Keep claims small: browsers cap a cookie near 4 KB and the library splits long values across chunks.
+## Rule: session cookies are httpOnly
+**Why:** `@supabase/ssr` writes the session cookie with `httpOnly: false` by default (`DEFAULT_COOKIE_OPTIONS` in the package source), because its browser client reads the session from the same cookies. A cookie JavaScript can read is one XSS away from exfiltration — the exact hole [set-up-auth](../../frontend/set-up-auth/SKILL.md) forbids. With auth server-side only, nothing in the browser needs the session, so the cookie can be httpOnly and JavaScript never reads a token. Keep claims small too: browsers cap a cookie near 4 KB and the library splits long values across chunks.
+**How to apply:** Force the options on every cookie the server client writes, in the `setAll` callback, merging over what the library passes: `{ ...options, ...AUTH_COOKIE_OPTIONS }` with `httpOnly: true`, `secure: process.env.NODE_ENV === 'production'`, `sameSite: 'lax'`, `path: '/'`. Pass the same object as `cookieOptions` on `createServerClient` so the library's own defaults (including the PKCE verifier cookie, which never needs to be JS-readable either) are hardened. `secure` is on only in production, so localhost keeps working over http. Code: `AUTH_COOKIE_OPTIONS` in [auth-flows.md](./auth-flows.md).
+**Anti-example:** Accepting the library default (`httpOnly: false`) because "the browser client needs it", and compensating with a CSP instead of closing the hole.
+
+## Rule: Realtime is the one browser feature that needs a token
+**Why:** A WebSocket subscription is a browser connection, not a request a route handler can make on the user's behalf, so Realtime needs a token client-side. httpOnly cookies deliberately do not expose one. This is the one honest exception to "no token in the browser".
+**How to apply:** A route handler that already authorized the caller (`requireViewer()`) returns the session's short-lived access token on demand; the client keeps it in a module variable (memory, wiped on reload), never `localStorage`, and re-fetches it when it expires. The channel still enforces RLS. Or move Realtime behind a server route and keep the token in the server.
 
 ## Rule: PKCE needs the same browser; email links use `token_hash`
 **Why:** OAuth and the default email link return a one-time `code`, and exchanging it requires the PKCE verifier cookie stored when sign-in began. Open the link on another device and the exchange fails. A link built from `{{ .TokenHash }}` is verified with `verifyOtp` and does not need the verifier. Some mail systems open links before the user does (Microsoft Defender Safe Links) and consume the token; a typed one-time code avoids that.
@@ -63,7 +68,7 @@ An unexpired access token stays valid after its session was revoked (signed out 
 **How to apply:** Sign-in uses the request-scoped client only. `supabase.auth.admin.*` runs in server-only jobs and Edge Functions, behind their own authorization.
 
 ## When to deviate
-- **Server-only app without Supabase client-side features:** harden with `httpOnly: true` cookies as above, after testing sign-in, refresh and sign-out in a browser.
+- **A client-heavy app that needs `supabase-js` auth in the browser** (client-side queries or Realtime that a route-handler token cannot serve): accept JS-readable cookies only with a strict Content-Security-Policy and say so in the repo README. That is the exception, not the default.
 - **A SPA talking to a separate API:** this skill does not apply; use the SPA flow in [set-up-auth](../../frontend/set-up-auth/SKILL.md) with Supabase's browser client.
 - **Third-party identity (Auth0, Clerk) in front of Supabase:** use Supabase's third-party auth configuration and keep RLS on the verified claims; the proxy and `getViewer` seams stay, with that provider's verifier.
 - **Next 15 or earlier:** `middleware.ts` / `middleware()` and no Cache Components; the Supabase code is identical.

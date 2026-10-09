@@ -721,13 +721,13 @@ MIGRATIONS = Path(__file__).parents[2] / "migrations"
 def database_url() -> Iterator[str]:
     """One real Postgres per test run, migrated once."""
     with PostgresContainer("postgres:18", driver="psycopg") as pg:
-        url = pg.get_connection_url()
+        url = pg.get_connection_url()  # postgresql+psycopg:// — the app driver already
         sync_engine = create_engine(url)
         with sync_engine.begin() as conn:  # run your real migrations here (alembic upgrade head)
             for sql in sorted(MIGRATIONS.glob("*.sql")):
                 conn.execute(text(sql.read_text()))
         sync_engine.dispose()
-        yield url.replace("+psycopg", "+asyncpg")
+        yield url
 
 
 @pytest.fixture
@@ -746,7 +746,7 @@ def idp() -> TestIdp:
 
 @pytest.fixture
 async def client(database_url: str, idp: TestIdp) -> AsyncIterator[AsyncClient]:
-    settings = make_settings(database_url=database_url.replace("+asyncpg", ""))
+    settings = make_settings(database_url=database_url)  # any scheme: create_engine normalizes to psycopg
     app = create_app(settings, keys=idp)
     async with (
         app.router.lifespan_context(app),

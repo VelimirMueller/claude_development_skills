@@ -304,7 +304,7 @@ under `skills/` resolves. CI runs the same script on every pull request.
 
 ## Status
 
-**v0.7.0.** One marketplace, seven plugins, 73 skills. Every code block in the new catalogues
+**v0.7.1.** One marketplace, seven plugins, 73 skills. Every code block in the new catalogues
 was built and run in scratch projects on 2026-10-09, and anything not run is labelled unverified
 in place. Versions are floors in each catalogue's `_shared/stack-versions.md`.
 

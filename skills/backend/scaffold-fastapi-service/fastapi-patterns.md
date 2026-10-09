@@ -31,9 +31,15 @@ Reference for [scaffold-fastapi-service](SKILL.md). Each rule was checked agains
 **Gotcha:** FastAPI returns 422 for validation errors by default; this scaffold maps them to 400 to match the other backends. If clients expect 422, change one constant in `errors.py`.
 **When to deviate:** A public API with a published error envelope: map to it in `errors.py`, keep `AppError` inside.
 
+## Rule: One driver: psycopg 3
+**Why:** SQLAlchemy and the procrastinate job queue ([set-up-background-jobs](../set-up-background-jobs/SKILL.md)) then share one driver, so a job can be deferred inside the request's transaction — the queue row is the outbox and commits or rolls back with the business write. One driver also means one set of connection settings: one dependency line, one URL scheme, one pool tuning. With two drivers the job needs a second connection and can survive a rolled-back request; the outbox guarantee is gone.
+**How to apply:** Install `psycopg[binary,pool]` (the `pool` extra pools procrastinate's worker connections). The SQLAlchemy URL scheme is `postgresql+psycopg://`; `create_engine` in `platform/db.py` sets it with `make_url(url).set(drivername=...)`, so a plain `postgresql://` URL works in settings, tests and CI. Driver errors are `psycopg.errors.*` (`UniqueViolation`), never `asyncpg.exceptions.*`. The same driver serves the sync migration pass and the async engine.
+**Anti-example:** `postgresql+asyncpg://` for the app plus psycopg for the worker: two connection settings to tune, and a deferred job that commits on a second connection after the request rolled back.
+**When to deviate:** asyncpg only for a service with no job queue that measured a driver-level bottleneck — a deliberate swap of `platform/db.py`, documented in the repo.
+
 ## Rule: Async SQLAlchemy: one engine per process, one session per request
 **Why:** An engine owns the pool and is expensive; a session is a unit of work and is cheap. A session shared across requests leaks state and transactions.
-**How to apply:** `create_engine` (asyncpg driver, `pool_pre_ping=True`) and `create_sessionmaker` (`expire_on_commit=False`, so returned objects stay readable after commit) run in the lifespan when `DATABASE_URL` is set. `get_session` is a dependency that yields a session inside `async with`. Dispose the engine in the lifespan `finally`. Readiness pings with `SELECT 1`.
+**How to apply:** `create_engine` (psycopg 3 driver, `pool_pre_ping=True`) and `create_sessionmaker` (`expire_on_commit=False`, so returned objects stay readable after commit) run in the lifespan when `DATABASE_URL` is set. `get_session` is a dependency that yields a session inside `async with`. Dispose the engine in the lifespan `finally`. Readiness pings with `SELECT 1`.
 **Anti-example:** A module-level `engine = create_async_engine(os.environ["DATABASE_URL"])`.
 **When to deviate:** Sync SQLAlchemy with `def` routes is fine for a small internal tool; FastAPI runs those in a thread pool. Do not mix blocking calls into `async def` routes.
 

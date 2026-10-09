@@ -388,7 +388,7 @@ documents_read = meter.create_counter("documents.read", description="Documents s
 
 
 def init_telemetry() -> None:
-    """Start the SDK and patch FastAPI, SQLAlchemy and the HTTP client libraries.
+    """Start the SDK and patch FastAPI, psycopg and the HTTP client libraries.
 
     Call it first in `main.py`, before anything imports `fastapi`: the instrumentation replaces
     classes, and a module that already did `from fastapi import FastAPI` keeps the original.
@@ -473,7 +473,7 @@ finally:
 "opentelemetry-distro>=0.66b1",
 "opentelemetry-exporter-otlp>=1.45.1",
 "opentelemetry-instrumentation-fastapi>=0.66b1",
-"opentelemetry-instrumentation-asyncpg>=0.66b1",
+"opentelemetry-instrumentation-psycopg>=0.66b1",
 ```
 
 `tests/conftest.py`:

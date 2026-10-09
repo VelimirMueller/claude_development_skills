@@ -30,7 +30,7 @@ Reference for [set-up-observability](SKILL.md). Each rule maps to [observability
 
 **Anti-example:** a span around `pool.query` by hand (the driver already does it), or `user.email` as a span attribute.
 
-**When to deviate:** Hot loops: do not span them, use a metric. Python DB instrumentation: `@opentelemetry/instrumentation-sqlalchemy` declares support for `sqlalchemy <2.1.0`; the scaffold pins `2.1.4`, so it reports "nothing can be instrumented". Use `opentelemetry-instrumentation-asyncpg` (driver level) instead — verified DB spans (2026-10-09).
+**When to deviate:** Hot loops: do not span them, use a metric. Python DB instrumentation: keep `opentelemetry-instrumentation-psycopg` (driver level) only — `opentelemetry-instrumentation-sqlalchemy` declares support for `sqlalchemy <2.1.0`; the scaffold pins `2.1.4`, so it reports "nothing can be instrumented", and a working SQLAlchemy layer beside the driver would double every DB span. Instrumentor import verified 2026-10-09; DB spans under SQLAlchemy not re-verified ([stack-versions.md](../_shared/stack-versions.md)).
 
 ## Rule: Route templates, not raw paths, in span names and metrics
 

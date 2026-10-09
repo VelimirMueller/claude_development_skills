@@ -11,8 +11,8 @@ version = "0.1.0"
 description = "svc"
 requires-python = ">=3.14"
 dependencies = [
-    "asyncpg>=0.32.0",
     "fastapi[standard]>=0.143.0",
+    "psycopg[binary,pool]>=3.3.6",
     "pydantic-settings>=2.15.0",
     "sqlalchemy[asyncio]>=2.1.4",
     "structlog>=26.1.0",
@@ -134,6 +134,7 @@ from collections.abc import AsyncIterator
 
 from fastapi import Request
 from sqlalchemy import text
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -143,8 +144,8 @@ from sqlalchemy.ext.asyncio import (
 
 
 def create_engine(database_url: str) -> AsyncEngine:
-    # asyncpg driver; pool_pre_ping drops dead connections after a database restart.
-    url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # psycopg 3, the one driver (app and job queue); pool_pre_ping drops dead connections.
+    url = make_url(database_url).set(drivername="postgresql+psycopg")
     return create_async_engine(url, pool_pre_ping=True)
 
 
@@ -332,6 +333,8 @@ async def get_note(
 ## `src/svc/transport/errors.py`
 
 ```python
+from collections.abc import Mapping
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -349,7 +352,7 @@ def _problem(
     status: int,
     title: str,
     detail: str | None = None,
-    headers: dict[str, str] | None = None,
+    headers: Mapping[str, str] | None = None,
     **extra: object,
 ) -> JSONResponse:
     body = Problem(title=title, status=status, detail=detail, instance=request.url.path, **extra)
@@ -391,6 +394,7 @@ def install_error_handlers(app: FastAPI) -> None:
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import partial
+from typing import Any
 
 from fastapi import FastAPI
 
@@ -403,7 +407,7 @@ from svc.transport import health, notes
 from svc.transport.errors import install_error_handlers
 
 
-def problem_json_media_type(schema: dict) -> dict:
+def problem_json_media_type(schema: dict[str, Any]) -> dict[str, Any]:
     """`model=` error responses are documented as application/json; ours are problem+json."""
     for path in schema["paths"].values():
         for op in path.values():
@@ -417,7 +421,7 @@ def problem_json_media_type(schema: dict) -> dict:
 
 
 def install_openapi(app: FastAPI) -> None:
-    def custom_openapi() -> dict:
+    def custom_openapi() -> dict[str, Any]:
         if app.openapi_schema is None:
             app.openapi_schema = problem_json_media_type(FastAPI.openapi(app))
         return app.openapi_schema

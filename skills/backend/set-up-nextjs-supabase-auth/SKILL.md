@@ -5,7 +5,7 @@ description: Use when adding or fixing Supabase Auth in a Next.js 16 App Router 
 
 # Set Up Next.js + Supabase Auth
 
-The session lives in cookies, is refreshed in `proxy.ts`, and is **verified** on the server with `getClaims()`. Redirects are UX; Postgres RLS is the authorization ([secure-supabase-rls](../secure-supabase-rls/SKILL.md)).
+The session lives in httpOnly cookies, is refreshed in `proxy.ts`, and is **verified** on the server with `getClaims()`. Auth is server-side only: Server Actions and route handlers sign in, sign out and exchange the PKCE code, so JavaScript never reads a token. Redirects are UX; Postgres RLS is the authorization ([secure-supabase-rls](../secure-supabase-rls/SKILL.md)).
 
 ## 1. Audit current state
 
@@ -43,7 +43,20 @@ Env (public prefix is fine: both values are public by design) and the validated 
 
 ## 5. Generate the seams
 
-`src/libs/supabase/browser.ts` and `admin.ts`: as in [set-up-supabase](../set-up-supabase/SKILL.md). The per-request server client:
+`src/libs/supabase/admin.ts`: as in [set-up-supabase](../set-up-supabase/SKILL.md). There is no browser client for auth — sign-in and sign-out are Server Actions. The forced cookie options, and the per-request server client:
+
+```ts
+// src/libs/supabase/cookies.ts
+import type { CookieOptions } from '@supabase/ssr';
+
+/** Forced on every cookie the server client writes. Session cookies are httpOnly; see supabase-auth-patterns.md. */
+export const AUTH_COOKIE_OPTIONS: CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: '/',
+};
+```
 
 ```ts
 // src/libs/supabase/server.ts
@@ -52,6 +65,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { clientEnv } from '@/libs/env.client';
 import type { Database } from './database.types';
+import { AUTH_COOKIE_OPTIONS } from './cookies';
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -60,11 +74,14 @@ export async function createClient() {
     clientEnv.NEXT_PUBLIC_SUPABASE_URL,
     clientEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
+      cookieOptions: AUTH_COOKIE_OPTIONS,
       cookies: {
         getAll: () => cookieStore.getAll(),
         setAll(cookiesToSet) {
           try {
-            for (const { name, value, options } of cookiesToSet) cookieStore.set(name, value, options);
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, { ...options, ...AUTH_COOKIE_OPTIONS });
+            }
           } catch {
             // Called from a Server Component, which cannot write cookies.
             // Safe to ignore: proxy.ts refreshes the session on every request.
@@ -143,11 +160,13 @@ curl -s -X POST $API/auth/v1/admin/users -H "apikey: $SECRET" -H "Authorization:
   -H 'content-type: application/json' -d '{"email":"owner@example.com","email_confirm":true}' >/dev/null
 TH=$(curl -s -X POST $API/auth/v1/admin/generate_link -H "apikey: $SECRET" -H "Authorization: Bearer $SECRET" \
   -H 'content-type: application/json' -d '{"type":"magiclink","email":"owner@example.com"}' | jq -r .hashed_token)
-curl -si -c jar.txt "http://localhost:3000/auth/confirm?token_hash=$TH&type=magiclink" | grep -i '^location\|^set-cookie' | cut -c1-80
+curl -si -c jar.txt "http://localhost:3000/auth/confirm?token_hash=$TH&type=magiclink" > confirm.txt
+grep -i '^location\|^set-cookie' confirm.txt | cut -c1-80
+grep -i '^set-cookie' confirm.txt | grep -q 'sb-.*HttpOnly' && echo "HttpOnly OK"
 curl -s -o /dev/null -w '%{http_code}\n' -b jar.txt http://localhost:3000/notes      # expect 200, not 307
 ```
 
-Expected: a redirect to `/`, a `set-cookie: sb-…-auth-token=…`, then 200 on `/notes` (the proxy and `getViewer()` accepted the session; RLS filtered the data). This ran against Next 16.4.0 and CLI 2.120.0. Then sign in with each enabled method in a browser: the page behind the login loads, DevTools shows `sb-<project-ref>-auth-token` cookies, a reload keeps the session, sign-out clears it and `/notes` redirects again. Force a token refresh (set `jwt_expiry = 60` locally, wait two minutes): the user stays signed in.
+Expected: a redirect to `/`, a `set-cookie: sb-…-auth-token=…; HttpOnly; SameSite=Lax`, then 200 on `/notes` (the proxy and `getViewer()` accepted the session; RLS filtered the data). Every `sb-*` cookie carries `HttpOnly` — the `grep` above fails loudly otherwise. This ran against Next 16.4.0 and CLI 2.120.0. Then sign in with each enabled method in a browser: the page behind the login loads, DevTools shows `sb-<project-ref>-auth-token` cookies marked HttpOnly, a reload keeps the session, sign-out clears it and `/notes` redirects again. Force a token refresh (set `jwt_expiry = 60` locally, wait two minutes): the user stays signed in.
 
 ## References
 - [supabase-auth-patterns.md](./supabase-auth-patterns.md) — `getClaims` vs `getUser` vs `getSession`, refresh, PKCE, redirects, cookies, sign-out.
