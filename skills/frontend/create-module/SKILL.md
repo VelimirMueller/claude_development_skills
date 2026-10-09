@@ -80,7 +80,7 @@ import { useTodos } from '@/composables/useTodos';
 import { openTodos } from '@/utils/openTodos';
 
 export function useTodoSummary() {
-  const todos = useTodos(computed(() => ({ status: 'all' as const })));
+  const todos = useTodos({ status: 'all' });
   const openCount = computed(() => openTodos(todos.data.value ?? []).length);
   return { openCount };
 }
