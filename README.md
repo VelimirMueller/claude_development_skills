@@ -1,106 +1,212 @@
-# frontendskills
+# claude_development_skills
 
-<sub>Repository: `claude_development_skills` · Claude Code plugin and marketplace: `frontendskills`</sub>
+<sub>Claude Code marketplace `frontendskills` · seven plugins</sub>
 
-**Senior frontend judgment — externalized as Claude Code skills that _execute_.**
+**Senior engineering judgment — externalized as audit-first Claude Code skills: frontend to infra, one plugin per domain.**
 
-Not a template that freezes a snapshot of "best practice," but a set of audit-first
-procedures that inspect what's already in front of them and apply only the senior move
-that's missing. Dual-framework **React 19 / Vue 3**, every version-specific claim checked
-against 2026's live tooling.
-
-`33 skills` · `Vite-SPA app lifecycle + landing + workflow catalogues` · `React 19 / Vue 3` · `MIT`
+`73 skills` · `7 plugins` · `React 19 / Vue 3 · Hono / Go / FastAPI · Supabase / Next 16 · Vercel / Hetzner / IONOS · Rust + Bevy` · `MIT`
 
 ---
 
 ## The idea
 
-Every senior carries a body of judgment that rarely gets written down — where server state
-ends and UI state begins, why an auth token must never touch `localStorage`, what a "molecule"
-is and isn't. It usually lives in one head and leaves when they do.
+Every senior carries a body of judgment that rarely gets written down — where server state ends
+and UI state begins, why a token must never touch `localStorage`, what a "molecule" is. It lives
+in one head and leaves when they do.
 
-`frontendskills` takes that judgment out of the head and makes it executable — on demand, on
-any codebase, the same way every time. Three properties make it a *tool* rather than a
-template:
+`claude_development_skills` takes that judgment out of the head and makes it executable — on
+demand, on any codebase, the same way every time. Four properties make it a *tool* rather than
+a template:
 
-- **Audit-first & idempotent.** Each skill inspects what's already there and applies only the
+- **Audit-first & idempotent.** Each skill inspects what is already there and applies only the
   missing move. Point it at an empty directory and it scaffolds; point it at a three-year-old
   repo and it brings one concern up to standard; run it twice and the second run is a no-op.
 - **Seams, not scattered vendor calls.** `fetcher`, `captureError`, `env`, `queryKeys`, the
-  analytics and flag clients — one point of indirection each, so swapping a vendor or mocking a
-  test is a one-file change.
+  analytics and flag clients, the OpenTelemetry pipeline — one point of indirection each, so
+  swapping a vendor or mocking a test is a one-file change.
 - **Boundaries that make bugs unrepresentable.** Server data lives in the Query cache, never a
-  store; tokens never touch `localStorage`. The worst recurring bugs are designed out, not
-  patched.
+  store; tokens never touch `localStorage`; a secret key never reaches a bundle. The worst
+  recurring bugs are designed out, not patched.
+- **Profile, not assumptions.** A one-time `set-up-stack-profile` wizard detects the stack, asks
+  only the gaps, and writes `.claude/stack-profile.md`; every skill reads it first, so the
+  author's defaults — pnpm, Biome, tests in `tests/` — are defaults, not mandates.
 
 Every rule ships with its *when to deviate*. The aim is judgment, not dogma.
 
+## Start here
+
+Add the marketplace and install `devcore`, then run the wizard:
+
+```
+/plugin marketplace add VelimirMueller/claude_development_skills
+/plugin install devcore@frontendskills
+```
+
+Then ask Claude to "set up my stack profile". The wizard detects the stack, asks only the gaps,
+writes `.claude/stack-profile.md`, and prints the plugins to enable and the skill order.
+
+| Plugin | Install id | For | Skills |
+|---|---|---|---|
+| devcore | `devcore@frontendskills` | the stack-profile wizard, security and toolchain audits, commit and PR writing | 6 |
+| frontendskills | `frontendskills@frontendskills` | Vite-SPA lifecycle (React 19 / Vue 3) + landing & content pages | 26 + 5 |
+| backendskills | `backendskills@frontendskills` | Hono / Go / FastAPI services, Supabase, Next 16 | 15 |
+| infraskills | `infraskills@frontendskills` | containers, OpenTofu, deploys, secrets, OTel collector | 8 |
+| cliskills | `cliskills@frontendskills` | command-line tools and the dev toolchain | 3 |
+| aiskills | `aiskills@frontendskills` | LLM seams, RAG, evals, MCP servers | 5 |
+| gameskills | `gameskills@frontendskills` | Rust + Bevy games | 5 |
+
+Every plugin depends on `devcore`, so installing any of them installs it too. Each enabled
+skill keeps its one-line `Use when` description in context on every turn, and loads in full only
+when that line matches. Install only the plugins your stack uses; the rest cost nothing.
+
+One step per plugin (Claude Code 2.1.275 or later adds the marketplace on the way):
+
+```
+/plugin install devcore --marketplace VelimirMueller/claude_development_skills
+/plugin install frontendskills --marketplace VelimirMueller/claude_development_skills
+/plugin install backendskills --marketplace VelimirMueller/claude_development_skills
+/plugin install infraskills --marketplace VelimirMueller/claude_development_skills
+/plugin install cliskills --marketplace VelimirMueller/claude_development_skills
+/plugin install aiskills --marketplace VelimirMueller/claude_development_skills
+/plugin install gameskills --marketplace VelimirMueller/claude_development_skills
+```
+
 ## The catalogue
 
+### devcore
+
+- **`set-up-stack-profile`** — Detects the stack, asks only the gaps, writes `.claude/stack-profile.md`.
+- **`audit-security`** — Scans secrets, deps, authz, headers, CI; fixes only approved findings.
+- **`audit-toolchain`** — Compares tooling to the radar and profile; reports gaps, changes nothing.
+- **`extend-skillset`** — Authors a house-style skill for a tool nothing covers.
+- **`write-commit-messages`** — A subject and body any developer can act on.
+- **`write-pull-requests`** — A description reviewers can follow end to end.
+
+### frontendskills
+
 **Bootstrap & tooling**
-- **`scaffold-frontend-project`** — Vite + TS app (React 19 / Vue 3), pnpm via Corepack, Node LTS, Tailwind v4.
-- **`clean-frontend-scaffolding`** — strip the Vite demo down to a clean slate.
-- **`configure-typescript`** — `strict` plus the modern flags, and the `@/` alias everywhere.
-- **`validate-env`** — Zod-validate `import.meta.env` at boot; one typed `env` the seams import.
-- **`configure-linting`** — Biome as the one tool (lint + format + import and Tailwind class sort, full Vue SFC support) + a lefthook pre-commit.
-- **`set-up-frontend-structure`** — atomic-design folders and barrels; tests in `tests/` by type.
-- **`create-module`** — the everyday authoring move: route new logic to the right layer (util/lib/hook/store) behind a typed boundary, keeping UI components thin.
+
+- **`scaffold-frontend-project`** — Vite + TS SPA (React 19 / Vue 3), pnpm, Node LTS, Tailwind v4.
+- **`clean-frontend-scaffolding`** — Strips the Vite demo down to a minimal shell.
+- **`configure-typescript`** — Strict flags, TS 6/7-safe paths, one `@/` alias in sync.
+- **`validate-env`** — Zod-validates `import.meta.env` once; exports a typed `env`.
+- **`configure-linting`** — Biome as the only lint/format/sort tool, plus a pre-commit hook.
+- **`set-up-frontend-structure`** — Atomic-design folders, feature modules, tests in `tests/`.
+- **`create-module`** — Routes new logic to the right layer, keeping components thin.
 
 **State, data & resilience**
-- **`set-up-state-management`** — TanStack Query (server) beside Zustand/Pinia (UI), one hard boundary, a typed query-key factory, a `fetcher` seam.
-- **`set-up-realtime`** — a transport-agnostic WebSocket seam that writes live server-push straight into the Query cache (patch the entity, invalidate the lists, re-sync on reconnect); connection status as the only UI store.
-- **`set-up-error-boundaries`** — layered boundaries behind a pluggable `captureError` seam.
-- **`configure-error-tracking`** — wire that seam to Sentry: tracing, masked replay, hidden source maps.
+
+- **`set-up-state-management`** — TanStack Query for server state, Zustand/Pinia for UI state.
+- **`set-up-realtime`** — A WebSocket seam writing server push into the Query cache.
+- **`set-up-error-boundaries`** — Layered boundaries behind a pluggable `captureError` seam.
+- **`configure-error-tracking`** — Points `captureError` at Sentry; no-op without a DSN.
 
 **Testing**
-- **`configure-test-stack`** — Vitest (Node + real-browser), Storybook stories-as-tests, Playwright e2e, and MSW mocking the *network*, under `tests/{unit,ui,integration,e2e}`.
+
+- **`configure-test-stack`** — Vitest, Storybook stories-as-tests, Playwright, MSW under `tests/`.
 
 **Capabilities**
-- **`set-up-routing`** — TanStack Router / Vue Router: typed routes, lazy splitting, loader↔Query prefetch, guards.
-- **`set-up-forms`** — React Hook Form / VeeValidate + Zod: one schema is shape, rules, and types; submit → mutation.
-- **`set-up-auth`** — the current user as server state, no `localStorage` tokens, route guards, single-flight 401 refresh.
-- **`set-up-i18n`** — i18next / vue-i18n: typed keys, lazy locales, `Intl` for every format.
-- **`set-up-document-head`** — per-route title/meta/OG and a truthful `<html lang>` (a11y + SEO).
-- **`set-up-feature-flags`** — a vendor-agnostic OpenFeature seam, fail-closed defaults, targeting, flag-gated routes.
+
+- **`set-up-routing`** — TanStack Router / Vue Router: typed, lazy, loader→Query prefetch, guards.
+- **`set-up-forms`** — React Hook Form / VeeValidate + Zod: schema-first, submit → mutation.
+- **`set-up-auth`** — Current user as server state, no `localStorage`, single-flight 401 refresh.
+- **`set-up-i18n`** — i18next / vue-i18n: typed keys, lazy locales, `Intl` formats.
+- **`set-up-document-head`** — Per-route title/meta/OG plus a truthful `<html lang>`.
+- **`set-up-feature-flags`** — Vendor-agnostic OpenFeature seam with fail-closed defaults.
 
 **Experience**
-- **`set-up-design-system`** — Tailwind v4 `@theme` tokens, class-based dark mode applied before first paint, cva primitives.
-- **`configure-accessibility`** — a11y lint, semantic/focus/reduced-motion conventions, axe in tests.
-- **`optimize-performance`** — the React Compiler, route/code-splitting, a CI bundle budget, Core Web Vitals.
+
+- **`set-up-design-system`** — Tailwind v4 `@theme` tokens, dark mode, cva primitives.
+- **`configure-accessibility`** — a11y lint, semantic/focus/reduced-motion rules, axe in tests.
+- **`optimize-performance`** — React Compiler, route splitting, bundle budget, Core Web Vitals.
 
 **Polish**
-- **`set-up-motion`** — native View Transitions + the Motion library, every animation reduced-motion-gated.
-- **`set-up-pwa`** — a `vite-plugin-pwa` offline shell, installable, with optional query-cache persistence.
-- **`configure-analytics`** — a provider-agnostic, privacy-first analytics seam + Web Vitals RUM.
+
+- **`set-up-motion`** — Native View Transitions + Motion, reduced-motion-gated.
+- **`set-up-pwa`** — `vite-plugin-pwa` offline shell, installable, optional cache persistence.
+- **`configure-analytics`** — Provider-agnostic, consent-gated analytics seam + Web Vitals.
 
 **Shipping & security**
-- **`configure-ci`** — a GitHub Actions gate (lint → typecheck → test → build → e2e + bundle budget) and Netlify preview deploys per PR.
-- **`set-up-security-headers`** — a Content-Security-Policy and security headers via Netlify, dependency hygiene (Dependabot), and the real XSS surface.
+
+- **`configure-ci`** — A least-privilege GitHub Actions gate and preview deploys per PR.
+- **`set-up-security-headers`** — A strict CSP and headers, dependency hygiene, honest XSS surface.
 
 **Landing & content pages (framework-agnostic)**
-- **`build-landing-page`** — one job per page, the section grammar (hero → proof → benefits → pricing → FAQ → final CTA), a semantic skeleton, and a hero LCP/CLS budget.
-- **`set-up-seo`** — the crawlability gate (content in served HTML), per-page metadata, JSON-LD by page type, sitemap + robots, answer-engine-readable structure.
-- **`set-up-lead-capture`** — the destination seam, invisible-first spam defenses (honeypot, time-trap → Turnstile), consent at capture, double opt-in.
-- **`audit-content-quality`** — rubric-driven page scoring with quoted evidence; fixes only the failed criteria. Project rubric at `.claude/rubrics/content-quality.md` overrides the default.
-- **`audit-copy-compliance`** — the pre-publish copy gate: violations with quoted text, the rule broken, and a compliant rewrite. Project rules at `.claude/rubrics/copy-compliance.md`.
 
-These five audit *built HTML* (any stack — Next, Astro, Nuxt, prerendered Vite, plain
-HTML) and gate themselves on the page-level question in
-[`skills/landing/_shared/page-types.md`](skills/landing/_shared/page-types.md): must this
-page be readable without JS?
+- **`build-landing-page`** — One job per page: section grammar, semantic skeleton, LCP/CLS budget.
+- **`set-up-seo`** — The crawlability gate, metadata, JSON-LD, sitemap, robots.
+- **`set-up-lead-capture`** — The destination seam, layered spam defense, consent, double opt-in.
+- **`audit-content-quality`** — Scores pages against a rubric; fixes only failed criteria.
+- **`audit-copy-compliance`** — Pre-publish copy gate: each violation quoted with a compliant rewrite.
 
-**Workflow: commits & pull requests (framework-agnostic)**
-- **`write-commit-messages`** — a subject and body any developer from junior to CTO can read and act on.
-- **`write-pull-requests`** — a bug-fix or feature description reviewers from junior to CTO can follow end to end.
+These five audit *built HTML* from any stack and gate on the page-level question in
+[`skills/landing/_shared/page-types.md`](skills/landing/_shared/page-types.md): readable without JS?
 
-Both write to one contract,
-[`skills/workflow/_shared/audience.md`](skills/workflow/_shared/audience.md): the junior
-can follow the text without tribal knowledge, the senior finds every claim next to its
-evidence, the CTO gets outcome and risk in the first lines.
+### backendskills
+
+**Service scaffolds**
+
+- **`scaffold-hono-service`** — A strict-TS Hono service with OpenAPI and health checks.
+- **`scaffold-go-service`** — A stdlib `net/http` Go service: layers, slog, validated config.
+- **`scaffold-fastapi-service`** — A uv src-layout FastAPI service with lifespan and problem+json.
+
+**Contracts & data**
+
+- **`design-http-api`** — OpenAPI 3.1 contract, RFC 9457 errors, generated typed client.
+- **`set-up-database`** — Postgres via compose, ORM/sqlc, migrations, a safety gate.
+- **`set-up-background-jobs`** — A Postgres-backed queue, outbox, idempotent handlers, retries.
+
+**Security & operations**
+
+- **`set-up-backend-auth`** — Verifies OIDC JWTs, BFF cookies, deny-by-default policies, tenant scoping.
+- **`harden-backend`** — Validation, rate/size limits, CORS, SSRF-safe fetch, CI scanning.
+- **`set-up-observability`** — OpenTelemetry: SDK first, HTTP/DB instrumentation, RED metrics.
+- **`configure-backend-tests`** — Unit, real-Postgres integration, HTTP, and contract tests.
+
+**Supabase & Next.js**
+
+- **`build-nextjs-backend`** — A server-only data layer authorizing every call in Next 16.
+- **`build-supabase-edge-function`** — Edge Functions with caller auth, CORS, secrets, tests.
+- **`secure-supabase-rls`** — RLS on every table, per-operation policies, proven with pgTAP.
+- **`set-up-nextjs-supabase-auth`** — Supabase Auth in Next 16: cookie clients, verified claims, PKCE.
+- **`set-up-supabase`** — CLI local stack, migrations-only schema, generated types, secret-safe client.
+
+### infraskills
+
+- **`containerize-service`** — Multi-stage Dockerfile per track: non-root, pinned, scanned.
+- **`deploy-otel-collector`** — One Compose collector per environment exporting to any OTLP backend.
+- **`deploy-to-hetzner`** — OpenTofu VM per environment, firewall, Traefik TLS, image-digest deploys.
+- **`deploy-to-ionos`** — IONOS Cloud via OpenTofu, or Deploy Now for a static site.
+- **`deploy-to-vercel`** — Linking, env per environment, protected previews, rollback, gated deploys.
+- **`manage-secrets`** — Decide where each secret lives; keep them out of images, logs, bundles.
+- **`set-up-delivery-pipeline`** — Trunk-based CI/CD: one image, promote dev→stg→prd by digest.
+- **`set-up-opentofu`** — OpenTofu layout, encrypted state, plan-as-artifact, drift detection.
+
+### cliskills
+
+- **`build-cli`** — Subcommands, typed args, `--json`, exit codes, `--dry-run`, tested.
+- **`release-cli`** — SemVer over the CLI surface, changelog-driven notes, signed artifacts.
+- **`set-up-dev-toolchain`** — mise or just, shared tasks, lefthook hooks, a doctor task.
+
+### aiskills
+
+- **`build-llm-seam`** — One module owns every model call: tiers, retries, structured output.
+- **`build-mcp-server`** — Task-shaped tools, read-only by default, typed inputs, tested.
+- **`build-rag-pipeline`** — Hybrid retrieval over pgvector, citations, an "I don't know" path.
+- **`secure-llm-features`** — Prompt-injection model, least-privilege tools, mapped to OWASP LLM Top 10.
+- **`set-up-llm-evals`** — Golden datasets, deterministic checks, a calibrated judge, CI gate.
+
+### gameskills
+
+- **`scaffold-bevy-game`** — A lib+bin cargo project with fast builds and optional wasm.
+- **`structure-bevy-app`** — Plugin-per-feature layout, app states, system ordering.
+- **`manage-bevy-assets`** — One asset-table seam, custom loaders, hot reload, embedded assets.
+- **`test-bevy-systems`** — Headless App/World tests with MinimalPlugins and deterministic time.
+- **`optimize-bevy-game`** — Measure first, then fix change detection, parallelism, allocations.
 
 ## How it composes
 
-The skills interlock front-to-back. A greenfield project runs roughly:
+The skills interlock front-to-back. A greenfield frontend runs roughly:
 
 ```
 scaffold → clean → configure-typescript → validate-env → configure-linting →
@@ -108,27 +214,25 @@ set-up-frontend-structure → set-up-state-management → set-up-error-boundarie
 configure-test-stack → set-up-routing → set-up-forms → set-up-auth → … → experience & polish
 ```
 
-The router carries the `queryClient` in its context, so a route loader prefetches into the
-exact cache a component's hook reads; the auth guard reads that same context; the form's submit
+The router carries the `queryClient` in its context, so a route loader prefetches into the exact
+cache a component's hook reads; the auth guard reads that same context; the form's submit
 invalidates that same query key; realtime writes into it from a socket. Because every skill is
-audit-first, this is a guide, not a constraint — run any one against an existing project to
-bring just that concern up to standard.
+audit-first, this is a guide, not a constraint: run any one against an existing project.
 
-## Install
-
-In Claude Code, add this repository as a marketplace, then install the plugin from it:
+A backend service and its deployment compose the same way:
 
 ```
-/plugin marketplace add VelimirMueller/claude_development_skills
-/plugin install frontendskills@frontendskills
+set-up-stack-profile → scaffold-<track>-service → set-up-database → design-http-api →
+set-up-backend-auth → harden-backend → set-up-observability → configure-backend-tests →
+containerize-service → set-up-delivery-pipeline → deploy-to-<host> → deploy-otel-collector
 ```
 
-Working from a local clone instead (to try your own edits):
+The seams carry across the whole chain. Each service keeps its I/O vendors — db, logger, tracer,
+clock — behind one `platform/` seam; the frontend reaches it through its `fetcher` seam with the
+OpenAPI client `design-http-api` generated; one OpenTelemetry pipeline ships every service's
+telemetry to one collector; one `deploy.sh` contract is all `deploy-to-<host>` expects.
 
-```
-/plugin marketplace add ./claude_development_skills
-/plugin install frontendskills@frontendskills
-```
+## Team setup
 
 For a team, commit the same setup to the project's `.claude/settings.json`, so everyone who
 trusts the folder gets the skills:
@@ -140,19 +244,22 @@ trusts the folder gets the skills:
       "source": { "source": "github", "repo": "VelimirMueller/claude_development_skills" }
     }
   },
-  "enabledPlugins": { "frontendskills@frontendskills": true }
+  "enabledPlugins": {
+    "devcore@frontendskills": true,
+    "backendskills@frontendskills": true
+  }
 }
 ```
 
-Claude Code discovers every `skills/**/SKILL.md`. A skill announces when it's relevant —
-*"Use when adding state management…"* — and loads only then, so the knowledge costs nothing
-until the moment it's needed. Update with `/plugin marketplace update frontendskills`.
+Run the wizard once per repo and commit the resulting `.claude/stack-profile.md` — it is team
+knowledge, not a secret, and it is what makes the author's defaults stay defaults.
+
+Update with `/plugin marketplace update frontendskills`.
 
 ## What a run looks like
 
-Illustrative: `set-up-state-management` on a fresh `pnpm create vite` React app, after
-`configure-typescript` and `set-up-frontend-structure`. You ask *"add state management"*;
-Claude matches the skill's `Use when` line and works through it:
+Illustrative: `set-up-state-management` on a fresh `pnpm create vite` React app. You ask *"add
+state management"*; Claude matches the `Use when` line and works through it:
 
 ```text
 1. Audit     no @tanstack/react-query, no zustand, no src/libs/fetcher.ts   → full setup
@@ -162,11 +269,11 @@ Claude matches the skill's `Use when` line and works through it:
 4. Seams     src/libs/fetcher.ts  src/libs/queryKeys.ts  src/libs/queryClient.ts
 5. Examples  src/hooks/useTodos.ts  src/hooks/useCreateTodo.ts  src/stores/useTodoFiltersStore.ts
 6. Wire      src/main.tsx → <QueryClientProvider> + devtools in DEV only
-7. Verify    pnpm tsc --noEmit
+7. Verify    pnpm typecheck
 ```
 
-Run it a second time and step 1 finds everything in place: the skill exits with
-*"State management already in place."* and changes nothing.
+Run it a second time and step 1 finds everything in place: the skill exits with *"State
+management already in place."* and changes nothing.
 
 ## Validate
 
@@ -174,34 +281,32 @@ Run it a second time and step 1 finds everything in place: the skill exits with
 bash scripts/validate.sh
 ```
 
-Checks that both manifests parse and agree on one version with the README and CHANGELOG,
-every `SKILL.md` carries a `name` matching its folder and a `Use when…` description, and every
-relative `.md` link under `skills/` resolves. CI runs the same script on every pull request.
+Checks that every marketplace entry carries a name, version, description, and `skills` list;
+that one version is shared by every entry, `metadata.version`, the CHANGELOG top entry, and the
+README Status line; that each catalogue is owned by exactly one plugin; that every `SKILL.md` has
+a `name` matching its folder and a description starting with "Use when", at most 300 characters,
+and valid YAML; that skill names are unique across catalogues; and that every relative `.md` link
+under `skills/` resolves. CI runs the same script on every pull request.
 
 ## Further reading
 
 - **[RATIONALE.md](RATIONALE.md)** — the design narrative: every load-bearing decision as *X over Y, for Z*.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the house style, and how to add a skill that fits.
 - **[CHANGELOG.md](CHANGELOG.md)** — what landed, and when.
+- **[skills/core/_shared/stack-profile.md](skills/core/_shared/stack-profile.md)** — the schema every skill reads first, and its precedence.
+- **[skills/core/_shared/tech-radar.md](skills/core/_shared/tech-radar.md)** — the Adopt/Hold lines the defaults come from.
+- **[skills/core/_shared/security-baseline.md](skills/core/_shared/security-baseline.md)** — the shared security bar behind `audit-security` and `harden-backend`.
+- **[skills/core/_shared/audience.md](skills/core/_shared/audience.md)** — the audience contract: one text the junior can follow, the senior can verify, the CTO can skim.
 - **[skills/frontend/_shared/architecture.md](skills/frontend/_shared/architecture.md)** — the seam map: how one `queryClient` threads the whole app.
 - **[skills/frontend/_shared/fetcher.md](skills/frontend/_shared/fetcher.md)** — the one canonical `fetcher`, base and auth versions.
-- **[skills/landing/_shared/page-types.md](skills/landing/_shared/page-types.md)** — the public-page gate and the priority inversion (when LCP is revenue and when it's polish).
-- **[skills/workflow/_shared/audience.md](skills/workflow/_shared/audience.md)** — the audience contract: one text the junior can follow, the senior can verify, the CTO can skim.
+- **[skills/backend/_shared/service-layout.md](skills/backend/_shared/service-layout.md)** — one layering standard for TypeScript, Go, and Python.
+- **[skills/landing/_shared/page-types.md](skills/landing/_shared/page-types.md)** — the public-page gate and the priority inversion.
 
 ## Status
 
-**v0.6.0.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
-lifecycle — bootstrap → language & tooling → structure → state → testing → capabilities →
-experience → polish → shipping — in 26 composable skills. `skills/landing/` adds the public-page
-world in 5 framework-agnostic skills: composition, discoverability, lead capture, and two
-rubric-driven audits whose rules a project can override. `skills/workflow/` adds delivery in 2
-framework-agnostic skills: commit messages and pull-request descriptions written for the junior,
-the senior, and the CTO at once. Deeper infrastructure and backend domains will follow under the
-same plugin.
-
-The folder standard maps 1:1 between Vue and React and onto Nuxt 4 and Next 16 — see
-[`folder-conventions.md`](skills/frontend/set-up-frontend-structure/folder-conventions.md) for the
-"I look for X → it is in Y" table.
+**v0.7.0.** One marketplace, seven plugins, 73 skills. Every code block in the new catalogues
+was built and run in scratch projects on 2026-10-09, and anything not run is labelled unverified
+in place. Versions are floors in each catalogue's `_shared/stack-versions.md`.
 
 ## License
 

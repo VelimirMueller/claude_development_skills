@@ -1,7 +1,7 @@
-# Why `frontendskills` Exists — The Ideas Behind the Plugin
+# Why these skills exist — the ideas behind the marketplace
 
 *A design narrative: the decisions, the trade-offs, and the case for codifying senior
-frontend judgment as a Claude Code plugin.*
+judgment as a Claude Code plugin marketplace.*
 
 ---
 
@@ -11,14 +11,15 @@ Every senior engineer carries a body of judgment that almost never gets written 
 It is the set of small, load-bearing decisions you make without thinking — where server
 state ends and UI state begins, why the auth token must never touch `localStorage`, which
 of two formatters owns the bytes, what a "molecule" is and is not. That judgment is the
-difference between a frontend that scales and one that calcifies. It usually lives in one
+difference between a codebase that scales and one that calcifies. It usually lives in one
 person's head and dies when they change jobs.
 
-`frontendskills` is an attempt to take that judgment out of the head and put it somewhere a
+This marketplace — `frontendskills` first, six more plugins beside it — is an attempt to
+take that judgment out of the head and put it somewhere a
 machine can apply it — **on demand, on any codebase, the same way every time.** Not a
 template that scaffolds a frozen snapshot of "best practice 2024," but a set of
 *situation-triggered procedures* that inspect what is actually in front of them and apply
-only the senior move that is missing. The plugin is, in one phrase, **externalized judgment
+only the senior move that is missing. The marketplace is, in one phrase, **externalized judgment
 that executes.**
 
 Everything else in this document is the story of the choices that shape that idea — told as
@@ -123,7 +124,9 @@ as a requirement, reduced-motion gating — is framework-*independent*. Zustand 
 Pinia; TanStack Query has adapters for both; the View Transitions API is native to neither and
 available to both. Encoding both frameworks roughly doubles who the plugin serves while the
 underlying ideas stay identical. The cost is real (every example written twice) and worth it,
-because the ideas were never about React or Vue in the first place.
+because the ideas were never about React or Vue in the first place. The backend catalogue uses
+the same idea as tracks — Hono, Go and FastAPI — with the track chosen by the stack profile
+instead of by doubled examples.
 
 ### 8. "When to deviate" — over commandments
 
@@ -177,21 +180,77 @@ local and only the deliverables were committed. A *personal* skill plugin that i
 defaults over yours would defeat its own purpose; the whole point is that it encodes **your**
 judgment, so that Claude works the way you would.
 
+### 12. A stack profile read by every skill — over hard-coded taste
+
+I chose **a one-time stack profile (`.claude/stack-profile.md`) that every skill reads
+first** over **hard-coded defaults baked into each skill**, to get **a set anyone can use
+without adopting my taste.**
+
+The profile is written once by a wizard: it detects what is already there, asks only for
+the gaps, and records the answers — package manager, framework, test layout, hosting,
+backend track. Every skill then reads it before it acts, so the same skill serves a pnpm
+shop and a bun shop without either reading the other's instructions. My defaults stay
+defaults — the wizard proposes them — but they are no longer impositions. That is what
+makes the marketplace usable by anyone, not only by someone who happens to work like me.
+
+### 13. One marketplace, several plugins — over one plugin that grows
+
+I chose **a marketplace of small, per-domain plugins** over **one plugin that grows
+without end**, to get **context cost that scales with what you use, not with what exists.**
+
+Every enabled skill's description is paid for on every turn — the listing budget is
+roughly one percent of the context window. A single plugin holding frontend, backend,
+infra, CLI, AI and game skills would tax every conversation with all of them. Split into
+plugins, people enable only their stack: a Vue shop loads `frontendskills`, a game
+studio loads `gameskills`, and neither pays for the other. The shared contracts — the
+version protocol, the security baseline, the logging contract — live once in `devcore`,
+which every plugin depends on, so nothing is stated twice.
+
+### 14. Snippets that ran — over snippets that look right
+
+I chose **building and running every code block in a scratch project before shipping
+it** over **snippets that merely look right**, to get **examples that work when pasted.**
+
+The new catalogues were verified against reality: a real Postgres for the migration
+recipes, a real Supabase stack for the edge-function and RLS skills, a real `next build`,
+a real Bevy 0.20 build, a real sops+age hook test. That is the only way to catch the bugs
+that matter: `drizzle-kit migrate` fails with exit 1 and no error text on `CREATE INDEX
+CONCURRENTLY` — a skill citing it as the recipe would look authoritative and break CI;
+`@opentelemetry/instrumentation-pino` does not patch ESM-imported pino, so the promised
+`trace_id` was missing from every log line; and `tsc --noEmit` checks zero files
+on the Vite 8 templates, which made every "verified" typecheck in the set vacuous.
+Anything that was not run is labelled *unverified* in place, so the reader knows exactly
+which claims rest on evidence and which on reading.
+
+### 15. A dated tech radar — over "latest and greatest"
+
+I chose **a dated tech radar — Adopt, Trial, Assess, Hold, each ring with its reasons**
+over **chasing whatever is newest**, to get **adoption on evidence rather than on
+release notes.**
+
+New tools arrive with the wind at their back and rarely with the caveats attached. The
+radar records where each technology stands and *why* — what recommending it today would
+be based on — so a new tool moves to Adopt only when there is evidence, not noise.
+`audit-toolchain` applies the same radar to a repository: it compares what the repo uses
+against the rings and reports the drift. The dates keep it honest; a radar without dates
+is just opinion in a table.
+
 ---
 
 ## What it buys you — and your Claude
 
-Installed, this plugin changes what Claude *is* on a frontend task. Without it, you get the
+Installed, these plugins change what Claude *is* on a build task. Without them, you get the
 model's average of the public internet: a generic, slightly-dated, framework-flavored default
-that you then spend your review budget correcting. With it, you get **your** frontend, every
+that you then spend your review budget correcting. With them, you get **your** stack, every
 time:
 
 - **Consistency without re-explaining.** You stop re-typing "put server state in Query, UI
   state in Zustand, validate env at boot, gate routes in the guard, respect reduced motion."
   It is encoded once and applied forever, identically, on project one and project fifty.
 - **Senior defaults, current.** The model reaches for Tailwind v4, Vitest browser mode, the
-  React Compiler, typed routes, schema-first forms — not because it guessed, but because the
-  knowledge was checked and written down.
+  React Compiler, typed routes, schema-first forms — and, on the other plugins, the same for
+  Postgres migrations, Supabase RLS, OpenTofu and the delivery pipeline — not because it
+  guessed, but because the knowledge was checked and written down.
 - **Whole classes of bugs designed out.** The state boundary kills dual-source-of-truth
   drift. The seams kill vendor lock-in and untestable code. `validate-env` kills silent
   misconfiguration. Fail-closed flags kill "an outage shipped the half-built feature."
@@ -201,7 +260,7 @@ time:
 - **Cost only when relevant.** None of this sits in your context until a task triggers it. The
   knowledge is free until the moment it is needed, then precise.
 
-In short: it turns Claude from a capable generalist into *your* senior frontend pair — one who
+In short: it turns Claude from a capable generalist into *your* senior pair — one who
 already knows your boundaries, your seams, your toolchain, and your taste, and who never
 forgets them.
 
@@ -211,8 +270,8 @@ The content is *procedural knowledge for a model to act on.* Of the available ve
 Claude Code plugin is the only one shaped like the content:
 
 - **Over loose skill files:** a plugin is a *versioned, distributable, namespaced unit.* All
-  twenty-two skills plus the shared `_shared/` conventions install together, evolve together,
-  and carry a version (`0.2.0`) you can reason about. You share it across every project and
+  skills of a plugin plus its shared `_shared/` conventions install together, evolve together,
+  and carry a version you can reason about. You share it across every project and
   with a team through a marketplace; you update it centrally and everyone gets the fix. Loose
   files are a folder you copy and forget to keep in sync.
 - **Over `CLAUDE.md` rules:** `CLAUDE.md` is always-on, project-local, unstructured prose. It
@@ -231,13 +290,15 @@ Claude Code plugin is the only one shaped like the content:
 
 The plugin format also brings the machinery that keeps the set honest: auto-discovery of every
 `skills/**/SKILL.md`, a `_shared/` home for the conventions that cross-cut the skills, and a
-`validate.sh` gate that refuses malformed frontmatter or broken reference links. The vessel
+`validate.sh` gate that refuses malformed frontmatter or broken reference links, and checks the
+marketplace itself — ownership, versions, description budgets, unique names. The vessel
 matches the cargo.
 
 ## Coda
 
 This started as four skills and a question — *"what's missing is state management."* It became
-a complete, twenty-two-skill account of how to build a 2026 frontend the way one senior
+a marketplace of 73 skills across seven plugins — how to build a 2026 frontend, backend,
+infrastructure, CLI, AI feature or game the way one senior
 engineer actually builds them: audit-first, seam-based, boundary-respecting, accessibility-
 and-performance-aware, verified against the real world, and honest about when its own rules
 do not apply. The deepest value is not any single skill. It is that the judgment is now
