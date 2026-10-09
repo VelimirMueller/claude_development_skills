@@ -42,7 +42,7 @@ Every rule ships with its *when to deviate*. The aim is judgment, not dogma.
 - **`clean-frontend-scaffolding`** — strip the Vite demo down to a clean slate.
 - **`configure-typescript`** — `strict` plus the modern flags, and the `@/` alias everywhere.
 - **`validate-env`** — Zod-validate `import.meta.env` at boot; one typed `env` the seams import.
-- **`configure-linting`** — Biome (lint + import sort) + Prettier (format) + a lefthook pre-commit.
+- **`configure-linting`** — Biome as the one tool (lint + format + import and Tailwind class sort, full Vue SFC support) + a lefthook pre-commit.
 - **`set-up-frontend-structure`** — atomic-design folders and barrels; tests in `tests/` by type.
 - **`create-module`** — the everyday authoring move: route new logic to the right layer (util/lib/hook/store) behind a typed boundary, keeping UI components thin.
 
@@ -190,7 +190,7 @@ relative `.md` link under `skills/` resolves. CI runs the same script on every p
 
 ## Status
 
-**v0.5.3.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
+**v0.6.0.** Three catalogues, one philosophy. `skills/frontend/` covers the full Vite-SPA app
 lifecycle — bootstrap → language & tooling → structure → state → testing → capabilities →
 experience → polish → shipping — in 26 composable skills. `skills/landing/` adds the public-page
 world in 5 framework-agnostic skills: composition, discoverability, lead capture, and two
@@ -198,6 +198,10 @@ rubric-driven audits whose rules a project can override. `skills/workflow/` adds
 framework-agnostic skills: commit messages and pull-request descriptions written for the junior,
 the senior, and the CTO at once. Deeper infrastructure and backend domains will follow under the
 same plugin.
+
+The folder standard maps 1:1 between Vue and React and onto Nuxt 4 and Next 16 — see
+[`folder-conventions.md`](skills/frontend/set-up-frontend-structure/folder-conventions.md) for the
+"I look for X → it is in Y" table.
 
 ## License
 

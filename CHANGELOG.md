@@ -6,6 +6,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.6.0] — 2026-10-09
+
+### Added
+- **`_shared/framework-idioms.md`** — Vue 3.5 (`useTemplateRef`, `defineModel`, reactive props destructure, `useId`, `MaybeRefOrGetter` composables, Vapor readiness) and React 19.3 (Compiler-first memoization, actions vs form library, `useOptimistic`, `use()`, transitions, `ref` as a prop) side by side.
+- **Feature modules** — from the second domain on, `src/features/<domain>/{api,hooks|composables,components,stores,schemas}` behind one `index.ts` (`conventions.md`, `module-patterns.md`, glossary).
+- **Findability table and Nuxt 4 / Next 16 mapping** in `folder-conventions.md`: the same folder names inside `app/` (Nuxt) and `src/` (Next); explicit imports for project code (`imports.scan: false`); `app/` in Next kept for routing files.
+- **`server-state.md`** — `queryOptions` as the shared unit for hooks, loaders and prefetch; a per-event invalidation table; optimistic updates via the UI (default) and via the cache with rollback.
+- **`set-up-design-system`** — named themes × light/dark by swapping token values through `@theme inline`.
+- **`scaffold-choices.md`** — when to pick a Vite SPA vs Nuxt/Next.
+
+### Changed
+- **`configure-linting` — Biome is the only linter and formatter.** Prettier and `prettier-plugin-tailwindcss` are removed; `useSortedClasses` (with a safe fix) sorts Tailwind classes; Vue gets full SFC support (`vue` domain, template a11y, formatter); `rules.preset` replaces the deprecated `rules.recommended`. CI drops `prettier --check`.
+- **`configure-accessibility`** — Vue templates are linted by Biome; `eslint-plugin-vuejs-accessibility` is no longer installed.
+- **`_shared/stack-versions.md`** — verified 2026-10-09 lines (React 19.3, Vue 3.5, Vite 8.3, Vitest 5.0, Biome 2.5, Tailwind 4.3, Pinia 4, TanStack Query 5.104); TypeScript 6.x in Vue repos until `vue-tsc` supports TS 7.
+- **`set-up-state-management`** — key factory gains `lists()`/`details()`; hooks export `queryOptions`; creates invalidate `lists()`; Pinia 4 installs `@vue/devtools-api`.
+- **`optimize-performance`** — React Compiler 1.0 via `@rolldown/plugin-babel` + `reactCompilerPreset` (plugin-react 6 removed the inline `babel` option); keep existing manual memoization.
+- **`scaffold-frontend-project`** — Vite 8 `react-compiler-ts` template; TS `~6.0` for Vue; the template's `oxlint` is replaced by Biome.
+- **`set-up-routing`** — the loader prefetches with the hook's `queryOptions`.
+- **`set-up-forms`** — React 19 actions as the option for one- or two-field forms (same Zod schema, same mutation).
+- **`create-module`** — routes domain code into feature modules; the description no longer promises a colocated test.
+- **`landing/build-landing-page/stack-pointers.md`** — Next 16.4 Cache Components and route groups, Nuxt 4 `app/` layout.
+
+### Fixed
+- **No skill loaded from the installed plugin.** Claude Code discovers `skills/<name>/SKILL.md` one level deep; the catalogues sit at `skills/<catalogue>/<name>/`, so `claude plugin details` reported `Skills (0)`. `plugin.json` now lists `./skills/frontend/`, `./skills/landing/`, `./skills/workflow/` (33 skills load), and `scripts/validate.sh` fails when a catalogue is missing from that list.
+- **`set-up-i18n`** — detection is limited to `de`/`en`, and the detected catalog loads before the first render (a German visitor saw English until a manual switch). `de` + `en` is the default pair.
+- **`set-up-document-head`** — `ensureQueryData` received a bare key instead of an options object.
+
 ## [0.5.3] — 2026-10-02
 
 ### Fixed
