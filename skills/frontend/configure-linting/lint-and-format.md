@@ -36,7 +36,7 @@ The support is labelled **experimental**, and the `vue` domain covers the essent
 `useVueMultiWordComponentNames` is off on purpose: atoms are named `Button`, `Card`, `Input` in both frameworks, and PascalCase tags in an SFC never collide with native elements.
 
 ## Tailwind class sorting
-`useSortedClasses` (nursery) sorts `class`/`className` and strings passed to the listed `functions`. Limits: it knows only the default Tailwind utilities (custom `@utility` and plugin variants are left unsorted), screen-variant order is not sorted, and whitespace inside the attribute collapses to single spaces. `"fix": "safe"` makes `--write` apply it; it stays at `warn` so a nursery change can't fail CI.
+`useSortedClasses` (nursery) sorts `class`/`className` and strings passed to the listed `functions`. Limits: it knows only the default Tailwind utilities (custom `@utility` and plugin variants are left unsorted), screen-variant order is not sorted, and whitespace inside the attribute collapses to single spaces. `"fix": "safe"` makes `--write` apply it; it stays at `warn` so a nursery change can't fail CI (`biome ci` exits non-zero on errors only, unless you pass `--error-on-warnings`).
 
 ## Migrating off ESLint
 `biome migrate eslint --write` reads flat and legacy configs, `extends` and `.eslintignore`, and ports the rules Biome supports (`--include-inspired` also ports near-equivalents). It does **not** translate `vue/*` rules — the `vue` domain replaces them. Review the diff, then delete the ESLint config + deps.

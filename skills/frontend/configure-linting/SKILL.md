@@ -81,7 +81,7 @@ pnpm add -D lefthook
   }
 }
 ```
-Merge these keys into the React file and drop the `react` domain. Full support makes Biome read the `<template>`: Vue rules (`useVueVForKey`, `noVueVIfWithVFor`, …), a11y rules (`useAltText`, `useButtonType`, …) and formatting all apply, and template usage no longer looks like unused variables. `vue-tsc` stays the type check for templates. Single-word names (`Button.vue`) stay allowed so components map 1:1 to React.
+Add `html` to the React file, **add** `useVueMultiWordComponentNames` to the existing `rules.style` (keep `preset`, `useImportType` and `useSortedClasses`), and replace the `react` domain with `vue`. Full support makes Biome read the `<template>`: Vue rules (`useVueVForKey`, `noVueVIfWithVFor`, …), a11y rules (`useAltText`, `useButtonType`, …) and formatting all apply, and template usage no longer looks like unused variables. `vue-tsc` stays the type check for templates. Single-word names (`Button.vue`) stay allowed so components map 1:1 to React.
 
 - `preset` replaces the deprecated `"recommended": true` (Biome 2.5). Match the `$schema` version to the Biome you installed.
 - `style.useImportType` mirrors `verbatimModuleSyntax` from `configure-typescript`.
@@ -116,6 +116,8 @@ pre-commit:
       run: pnpm biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
 ```
+
+Biome does not format Markdown or YAML; leave them to the editor (the old Prettier hook did format them).
 
 Install the git hooks once:
 ```bash

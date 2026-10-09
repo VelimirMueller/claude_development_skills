@@ -32,6 +32,7 @@ Ask the user (AskUserQuestion):
 ```bash
 # React (React Compiler pre-wired — see optimize-performance)
 pnpm create vite@latest <name> --template react-compiler-ts
+# (no such template in your create-vite? use react-ts + optimize-performance step 4)
 
 # Vue
 pnpm create vite@latest <name> --template vue-ts

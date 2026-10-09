@@ -39,7 +39,7 @@ export default defineConfig({
   plugins: [
     // if set-up-routing ran, tanstackRouter() goes FIRST
     react(),
-    babel({ presets: [reactCompilerPreset()] }), // compiler = build-time transform
+    babel({ presets: [reactCompilerPreset()] }), // order as in the React docs; the preset runs on source
     // then tailwindcss()
   ],
 });

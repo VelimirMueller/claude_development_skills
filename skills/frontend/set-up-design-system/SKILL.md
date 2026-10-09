@@ -62,7 +62,7 @@ Tailwind v4 reads tokens from CSS and generates the matching utilities (`bg-bran
 .dark, [data-theme="default"].dark       { --bg: #09090b; --fg: #f4f4f5; --accent: #fafafa; --ring: #e4e4e7; }
 [data-theme="neon"].dark                 { --bg: #05040d; --fg: #e6f1ff; --accent: #00fff7; --ring: #00fff7; }
 ```
-Components use `bg-bg text-fg ring-ring` only — a new theme is one CSS block, no component change. Check every fg/bg pair for 4.5:1 per theme and mode (`configure-accessibility`).
+Every theme defines both modes (`[data-theme="neon"]` for light is omitted here for brevity); a missing block silently falls back to `:root`. Components use `bg-bg text-fg ring-ring` only — a new theme is one CSS block, no component change. Check every fg/bg pair for 4.5:1 per theme and mode (`configure-accessibility`).
 
 ## 6. The `cn()` class merger
 

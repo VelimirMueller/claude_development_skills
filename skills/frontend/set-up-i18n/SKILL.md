@@ -85,7 +85,7 @@ export async function loadLocale(lng: Locale) {
 
 export default i18n;
 ```
-Only `en` ships in the bundle; `main.tsx` awaits `loadLocale(persistedLocale ?? initialLocale)` before the first render, so a German visitor never sees English first. Vue: `createI18n({ legacy: false, locale, fallbackLocale: 'en', messages: { en } })` + dynamic `import()` + `i18n.global.setLocaleMessage` to lazy-add.
+Only `en` ships in the bundle; `main.tsx` awaits `loadLocale(persistedLocale ?? initialLocale)` before the first render, so a German visitor never sees English first. `persistedLocale` comes from the locale store (step 9); `initialLocale` covers first visits. In Nuxt/Next, `navigator` does not exist on the server — use `@nuxtjs/i18n` / the request's `Accept-Language` instead of this module. Vue: `createI18n({ legacy: false, locale, fallbackLocale: 'en', messages: { en } })` + dynamic `import()` + `i18n.global.setLocaleMessage` to lazy-add.
 
 ## 7. Type the keys (autocomplete + no missing-key bugs)
 
