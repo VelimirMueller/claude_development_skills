@@ -72,8 +72,7 @@ useMutation({
   onError: (_err, next, ctx) => {
     if (ctx?.previous) queryClient.setQueryData(queryKeys.todos.detail(next.id), ctx.previous);
   },
-  onSettled: (_d, _e, next) =>
-    queryClient.invalidateQueries({ queryKey: queryKeys.todos.detail(next.id) }),
+  onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.todos.all }), // detail + lists
 });
 ```
 React 19's `useOptimistic` is for form actions / Server Actions; on TanStack data use one of the two patterns above, never both (`../_shared/framework-idioms.md`).
