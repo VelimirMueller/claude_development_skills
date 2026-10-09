@@ -29,6 +29,7 @@ bump, a fix to an existing one is a patch.
 - **`landing/build-landing-page/stack-pointers.md`** — Next 16.4 Cache Components and route groups, Nuxt 4 `app/` layout.
 
 ### Fixed
+- **No skill loaded from the installed plugin.** Claude Code discovers `skills/<name>/SKILL.md` one level deep; the catalogues sit at `skills/<catalogue>/<name>/`, so `claude plugin details` reported `Skills (0)`. `plugin.json` now lists `./skills/frontend/`, `./skills/landing/`, `./skills/workflow/` (33 skills load), and `scripts/validate.sh` fails when a catalogue is missing from that list.
 - **`set-up-i18n`** — detection is limited to `de`/`en`, and the detected catalog loads before the first render (a German visitor saw English until a manual switch). `de` + `en` is the default pair.
 - **`set-up-document-head`** — `ensureQueryData` received a bare key instead of an options object.
 

@@ -39,6 +39,14 @@ TOP_ENTRY=$(grep -m1 -Eo '^## \[[^]]+\]' CHANGELOG.md || true)
 [ "$TOP_ENTRY" = "## [$VERSION]" ] || fail "CHANGELOG.md top entry is '$TOP_ENTRY', expected '## [$VERSION]'"
 grep -q "^\*\*v$VERSION\.\*\*" README.md || fail "README.md Status does not say '**v$VERSION.**'"
 
+# 1c. Every catalogue that holds skills is registered in plugin.json "skills"
+#     (Claude Code only discovers skills/<name>/SKILL.md one level deep by default;
+#      catalogues sit one level deeper, so an unregistered one ships zero skills)
+for CAT in $(find skills -mindepth 2 -maxdepth 3 -name SKILL.md | cut -d/ -f2 | sort -u); do
+  jq -e --arg c "./skills/$CAT/" '.skills | index($c)' "$MANIFEST" >/dev/null \
+    || fail "$MANIFEST \"skills\" does not list ./skills/$CAT/ (its skills would not load)"
+done
+
 # 2. Skill files
 mapfile -t SKILLS < <(find skills -type f -name SKILL.md 2>/dev/null | sort)
 [ "${#SKILLS[@]}" -gt 0 ] || fail "no SKILL.md files found under skills/"

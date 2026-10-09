@@ -9,6 +9,11 @@
   "homepage": "https://github.com/VelimirMueller/claude_development_skills",
   "repository": "https://github.com/VelimirMueller/claude_development_skills",
   "license": "MIT",
+  "skills": [
+    "./skills/frontend/",
+    "./skills/landing/",
+    "./skills/workflow/"
+  ],
   "keywords": [
     "frontend",
     "react",
