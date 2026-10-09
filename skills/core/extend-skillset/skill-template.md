@@ -80,7 +80,7 @@ Structure and validator checks:
 - [ ] `description` is at most 300 characters.
 - [ ] No `when_to_use` field.
 - [ ] Every relative `.md` link resolves (shared contracts, sibling reference files).
-- [ ] When contributing upstream: the catalogue directory is listed in `plugin.json` `skills`.
+- [ ] When contributing upstream: the catalogue directory is listed in the `skills` array of exactly one plugin entry in `.claude-plugin/marketplace.json` (there is no root `plugin.json`).
 
 House style checks:
 

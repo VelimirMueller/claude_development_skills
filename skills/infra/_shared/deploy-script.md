@@ -151,13 +151,17 @@ if ! start; then
   if [[ -n "$previous" && "$previous" != "$image" ]]; then
     echo "deploy: rolling back to $previous" >&2
     write_release "$previous"
-    start >&2 || true
+    start >&2 || echo "deploy: ROLLBACK FAILED - $previous did not come up; the app is down" >&2
   fi
   exit 1
 fi
 
 running="$(docker inspect --format '{{.Config.Image}}' "$(compose ps -q app)")"
 [[ "$running" == "$image" ]] || die "running image $running does not match $image"
+# Keep the release just replaced: an image pulled by digest is untagged, so prune would delete it, and a
+# later failed deploy could not roll back (--pull never, registry token already gone). A tagged image is
+# not dangling. The tag moves on every deploy, so the host keeps exactly the current and the previous image.
+if [[ -n "$previous" && "$previous" != "$image" ]]; then docker tag "$previous" "deploy-rollback:$ENVIRONMENT"; fi
 docker image prune -f >/dev/null
 echo "deployed $ENVIRONMENT $running"
 ```
