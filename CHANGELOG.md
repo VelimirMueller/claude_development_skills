@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.7.1] — 2026-10-09
+
+### Changed
+- `set-up-nextjs-supabase-auth`, `set-up-supabase`: session cookies are `httpOnly` (forced through `cookieOptions` and the `setAll` merge); sign-in, sign-out and the PKCE exchange run on the server only; the browser client serves Realtime and non-auth queries. Matches `set-up-auth` (no JS-readable tokens). Verified on a local Supabase stack: every `sb-*` cookie carries `HttpOnly`.
+- FastAPI track: one driver, psycopg 3 (`postgresql+psycopg://`), so SQLAlchemy and procrastinate share it and a job defers inside the request transaction. OTel uses `opentelemetry-instrumentation-psycopg`. Verified: ruff, mypy strict, pytest 8/8 incl. testcontainers Postgres 18.
+
 ## [0.7.0] — 2026-10-09
 
 ### Added

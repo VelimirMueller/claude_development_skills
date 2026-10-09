@@ -53,7 +53,7 @@ Rows from the Supabase and Next.js backend skills (verified 2026-10-09, docs/age
 |---|---|---|---|
 | Supabase CLI (npm `supabase`) | 2.120.0 | npm view; GitHub release v2.120.0 published 2026-10-06; ran it | local Postgres major_version 17 in config template, image postgres 17.11.0.004; `supabase init` writes [experimental.pgdelta] enabled = true |
 | @supabase/supabase-js | 2.117.3 | npm view; installed | corsHeaders export at `@supabase/supabase-js/cors` from 2.95.0 |
-| @supabase/ssr | 0.12.7 | npm view; installed, source read | default cookie options httpOnly false, sameSite lax, maxAge 400 days |
+| @supabase/ssr | 0.12.7 | npm view; installed, source read | default cookie options httpOnly false, sameSite lax, maxAge 400 days; skills force httpOnly via `createServerClient` `cookieOptions` + a merge in `setAll` (verified against source: `DEFAULT_COOKIE_OPTIONS`, `CookieOptions = Partial<SerializeOptions>`) |
 | @supabase/server | 1.9.1 | npm view; type-checked and ran in Edge runtime | README: v1 public beta; `withSupabase`, `createSupabaseContext` |
 | next | 16.4.0 | npm view; GitHub release 2026-10-07; built and ran | Node >= 20.9; TypeScript >= 5.1; Turbopack default; proxy.ts replaces middleware.ts, Node runtime; error.tsx `retry` prop stable since 16.3.0 |
 | react / react-dom | 19.3.0 | npm view; installed | |
@@ -101,8 +101,8 @@ Rows from the Supabase and Next.js backend skills (verified 2026-10-09, docs/age
 | `pydantic-settings` | 2.15 | PyPI JSON | |
 | `sqlalchemy` | 2.1.4 | PyPI JSON | `sqlalchemy[asyncio]`; `async_sessionmaker`, `AsyncSession` |
 | `alembic` | 1.20 | PyPI JSON | |
-| `asyncpg` | 0.32 | PyPI JSON | Async driver for SQLAlchemy (`postgresql+asyncpg://`) |
-| `psycopg` | 3.3.6 | PyPI JSON | Alternative async driver |
+| `asyncpg` | 0.32 | PyPI JSON | Not used in the FastAPI track — one driver: psycopg 3 ([fastapi-patterns.md](../scaffold-fastapi-service/fastapi-patterns.md)) |
+| `psycopg` | 3.3.6 | PyPI JSON | The one Postgres driver for the FastAPI track: `psycopg[binary,pool]`, `postgresql+psycopg://` for SQLAlchemy, the driver of `procrastinate` |
 | `uvicorn` | 0.54 | PyPI JSON | Pulled in by `fastapi[standard]` |
 | `structlog` | 26.1 | PyPI JSON | Logger per [logging-contract.md](../../core/_shared/logging-contract.md) |
 | `ruff` | 0.16.10 | PyPI JSON | Lint and format. Pre-1.0: pin with `~=` |
@@ -117,7 +117,7 @@ Rows from the Supabase and Next.js backend skills (verified 2026-10-09, docs/age
 | `pyjwt` | 2.15.1 | docs/agent-reports/backend-auth-sec-o11y-tests.md | |
 | `slowapi` | 0.1.10 | docs/agent-reports/backend-auth-sec-o11y-tests.md | Released 2026-06-13 |
 | `opentelemetry-distro` | 0.66b1 | docs/agent-reports/backend-auth-sec-o11y-tests.md | |
-| `opentelemetry-instrumentation-fastapi` / `-asyncpg` / `-sqlalchemy` | 0.66b1 | docs/agent-reports/backend-auth-sec-o11y-tests.md | `-sqlalchemy` supports sqlalchemy <2.1 (scaffold pins 2.1.4) and silently instruments nothing; use `-asyncpg` |
+| `opentelemetry-instrumentation-fastapi` / `-psycopg` / `-sqlalchemy` | 0.66b1 | docs/agent-reports/backend-auth-sec-o11y-tests.md; `-psycopg` on PyPI JSON, re-checked 2026-10-09 | `-sqlalchemy` supports sqlalchemy <2.1 (scaffold pins 2.1.4) and silently instruments nothing; use `-psycopg` (wraps sync and async psycopg connections; DB spans under SQLAlchemy not re-verified in this change) |
 | `opentelemetry-sdk` | 1.45.1 | docs/agent-reports/backend-auth-sec-o11y-tests.md | |
 | `schemathesis` | 4.30.0 | docs/agent-reports/backend-auth-sec-o11y-tests.md | |
 | `pip-audit` | 2.10.1 | docs/agent-reports/backend-auth-sec-o11y-tests.md | |

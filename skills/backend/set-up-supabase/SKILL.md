@@ -94,7 +94,7 @@ One Supabase project per environment (local stack, staging, production); keys di
 `src/libs/supabase/` (Next/React) or the equivalent seam folder:
 
 ```ts
-// browser.ts — public key, runs in the browser
+// browser.ts — public key, runs in the browser; Realtime and non-auth queries only, never auth
 import { createBrowserClient } from '@supabase/ssr'; // Vite SPA without SSR: createClient from supabase-js
 import type { Database } from './database.types';
 
@@ -104,6 +104,8 @@ export const createClient = () =>
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
   );
 ```
+
+On Next.js the session cookie is httpOnly ([set-up-nextjs-supabase-auth](../set-up-nextjs-supabase-auth/SKILL.md)), so this client cannot read the session and never signs anyone in. Auth is server-side only; the browser client exists for Realtime and non-auth queries. Realtime needs a token client-side — see the pattern in that skill.
 
 ```ts
 // admin.ts — secret key, bypasses RLS, server only

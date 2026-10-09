@@ -48,7 +48,7 @@ All three need a **direct** Postgres connection for workers (no transaction-mode
 ```bash
 pnpm add pg-boss @opentelemetry/api               # hono: pg-boss imports @opentelemetry/api at runtime (peer)
 go get github.com/riverqueue/river github.com/riverqueue/river/riverdriver/riverpgxv5   # go: v0.49 needs Go 1.26+
-uv add procrastinate                               # fastapi (needs psycopg[binary,pool] from set-up-database)
+uv add procrastinate                               # fastapi (psycopg[binary,pool] is already installed: scaffold and set-up-database ship it)
 ```
 
 If the package manager skips peers (npm `--legacy-peer-deps`), install `@opentelemetry/api` by hand: without it `import 'pg-boss'` throws `ERR_MODULE_NOT_FOUND`.

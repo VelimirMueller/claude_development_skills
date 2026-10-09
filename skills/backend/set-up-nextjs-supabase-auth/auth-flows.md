@@ -1,6 +1,6 @@
 # Auth Flows — Code
 
-Reference for `set-up-nextjs-supabase-auth`. Every file below type-checks and builds on Next 16.4.0, `@supabase/ssr` 0.12.7 and `@supabase/supabase-js` 2.117.3 (TypeScript 7.0.2), and the redirect behaviour was exercised on a production build (`next start`): the protected route returned 307 to `/login?next=%2Fnotes`, a bad code and a bad `type` returned redirects to `/login?error=…`, and hostile `next` values collapsed to `/`. Sign-in against a live Auth server is covered in step 9 of the skill. Paths follow the folder standard (`src/libs`, `src/server`, `src/features`, `src/app`).
+Reference for `set-up-nextjs-supabase-auth`. Every file below type-checks and builds on Next 16.4.0, `@supabase/ssr` 0.12.7 and `@supabase/supabase-js` 2.117.3 (TypeScript 7.0.2), and the redirect behaviour was exercised on a production build (`next start`): the protected route returned 307 to `/login?next=%2Fnotes`, a bad code and a bad `type` returned redirects to `/login?error=…`, and hostile `next` values collapsed to `/`. Sign-in against a live Auth server is covered in step 9 of the skill; the httpOnly forcing was exercised the same way on a local stack, where the sign-in response carried `Set-Cookie: sb-…-auth-token=…; Secure; HttpOnly; SameSite=lax`. Paths follow the folder standard (`src/libs`, `src/server`, `src/features`, `src/app`).
 
 ## Proxy
 
@@ -12,6 +12,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { clientEnv } from '@/libs/env.client';
 import type { Database } from './database.types';
+import { AUTH_COOKIE_OPTIONS } from './cookies';
 
 /** Paths that need a session. A coarse redirect for UX; every data call still authorizes. */
 const PROTECTED_PREFIXES = ['/notes'];
@@ -23,13 +24,14 @@ export async function updateSession(request: NextRequest) {
     clientEnv.NEXT_PUBLIC_SUPABASE_URL,
     clientEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
+      cookieOptions: AUTH_COOKIE_OPTIONS,
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll(cookiesToSet, headers) {
           for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
           supabaseResponse = NextResponse.next({ request });
           for (const { name, value, options } of cookiesToSet) {
-            supabaseResponse.cookies.set(name, value, options);
+            supabaseResponse.cookies.set(name, value, { ...options, ...AUTH_COOKIE_OPTIONS });
           }
           // Cache-Control and friends stop a CDN from serving one user's refreshed session to another.
           for (const [key, value] of Object.entries(headers)) supabaseResponse.headers.set(key, value);
@@ -82,6 +84,7 @@ Five rules, each from the Supabase SSR guide and its client source:
 - Apply the `headers` that `setAll` receives (`Cache-Control`, `Expires`, `Pragma`) to the response. They stop a CDN from caching a response that carries someone's `Set-Cookie`.
 - Return the response `setAll` last built. A fresh `NextResponse.next()` loses the cookies; when you must return another response, copy cookies and cache headers onto it (as the redirect branch does).
 - Create a new client per request, never in module scope.
+- Every cookie goes out with `AUTH_COOKIE_OPTIONS` forced over its options (httpOnly): set on `cookieOptions` and merged in `setAll`. The rule and why: [supabase-auth-patterns.md](./supabase-auth-patterns.md).
 
 ## Routes
 

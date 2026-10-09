@@ -44,7 +44,7 @@ Also read `observability.backend` (`signoz` \| `grafana-lgtm` \| `sentry` \| `no
 ```bash
 pnpm add @opentelemetry/api @opentelemetry/core @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-metrics-otlp-http @opentelemetry/sdk-metrics   # hono
 go get go.opentelemetry.io/otel go.opentelemetry.io/otel/sdk go.opentelemetry.io/otel/sdk/metric go.opentelemetry.io/contrib/exporters/autoexport go.opentelemetry.io/contrib/propagators/autoprop go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp github.com/exaring/otelpgx   # go
-uv add opentelemetry-distro opentelemetry-exporter-otlp opentelemetry-instrumentation-fastapi opentelemetry-instrumentation-asyncpg   # fastapi (NOT instrumentation-sqlalchemy, see tracks)
+uv add opentelemetry-distro opentelemetry-exporter-otlp opentelemetry-instrumentation-fastapi opentelemetry-instrumentation-psycopg   # fastapi (NOT instrumentation-sqlalchemy, see tracks)
 ```
 
 Use the profile's package manager. Verify each line in [stack-versions.md](../_shared/stack-versions.md) before you write it.
@@ -92,7 +92,7 @@ OTEL_TRACES_EXPORTER=console uv run fastapi run                  # fastapi
 Curl one route and expect:
 
 - span name TS `GET /notes/:id` with attribute `http.route`; Go `GET /notes/{id}` with `http.route`; Python `GET /notes/{note_id}`;
-- DB spans appear when the DB is used — Go: `otelpgx` spans; TS: `pg.query:SELECT postgres` with attribute `db.system.name=postgresql`; Python: asyncpg spans with `db.system=postgresql`;
+- DB spans appear when the DB is used — Go: `otelpgx` spans; TS: `pg.query:SELECT postgres` with attribute `db.system.name=postgresql`; Python: psycopg spans with `db.system=postgresql`;
 - the structured log line of the same request carries the same `trace_id`;
 - send `SIGTERM` right after a request: the spans still appear (flush on shutdown).
 

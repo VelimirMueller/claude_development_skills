@@ -47,10 +47,10 @@ docker info >/dev/null 2>&1 && echo "docker: ok" || echo "docker: missing"
 ```bash
 pnpm add -D vitest @testcontainers/postgresql   # hono; add @types/pg too when the app uses pg
 go get github.com/testcontainers/testcontainers-go/modules/postgres github.com/go-jose/go-jose/v4   # go: container + test-token signing
-uv add --dev testcontainers psycopg[binary]     # fastapi: plain testcontainers, no [postgres] extra
+uv add --dev testcontainers "psycopg[binary]"     # fastapi: plain testcontainers, no [postgres] extra
 ```
 
-Python imports the container from `testcontainers.community.postgres` (`testcontainers.postgres` is deprecated). `psycopg` drives the container URL and the migration pass; `asyncpg` stays the app driver. Use the profile's package manager. Versions: [stack-versions.md](../_shared/stack-versions.md).
+Python imports the container from `testcontainers.community.postgres` (`testcontainers.postgres` is deprecated). `psycopg` is the one driver: the container URL (`postgresql+psycopg://`) drives the migration pass and the app engine unchanged — no URL rewriting between them. Use the profile's package manager. Versions: [stack-versions.md](../_shared/stack-versions.md).
 
 ## 5. Generate
 

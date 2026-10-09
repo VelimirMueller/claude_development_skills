@@ -43,7 +43,7 @@ Read the profile first; detect only what it leaves open ([stack-profile.md](../.
 
 ```bash
 uv init --package --python 3.14 --name <pkg> .        # only when pyproject.toml is missing
-uv add "fastapi[standard]" pydantic-settings structlog "sqlalchemy[asyncio]" asyncpg
+uv add "fastapi[standard]" pydantic-settings structlog "sqlalchemy[asyncio]" "psycopg[binary,pool]"
 uv add --dev ruff mypy pytest pytest-asyncio httpx
 ```
 
@@ -83,7 +83,7 @@ Add an empty `__init__.py` to `platform/`, `repository/`, `service/`, `transport
 uv sync --locked                       # expect: no changes
 uv run ruff format --check . && uv run ruff check .   # expect: "All checks passed!"
 uv run mypy                            # expect: "Success: no issues found"
-uv run pytest -q                       # expect: 5 passed
+uv run pytest -q                       # expect: 6 passed
 uv run fastapi run --port 8087 &       # expect a JSON "starting" line, then uvicorn "Application startup complete"
 curl -si localhost:8087/notes/nope     # expect 404 and content-type: application/problem+json
 curl -s localhost:8087/readyz          # expect {"status":"ok"}
