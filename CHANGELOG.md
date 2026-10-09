@@ -6,6 +6,48 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html): a new skill is a minor
 bump, a fix to an existing one is a patch.
 
+## [0.7.0] — 2026-10-09
+
+### Added
+- **The multi-plugin marketplace** — six plugins next to `frontendskills`: `devcore`, `backendskills`, `infraskills`, `cliskills`, `aiskills`, `gameskills`; the set now stands at **73 skills across seven plugins**.
+- **`devcore`** — `set-up-stack-profile` (the wizard behind `.claude/stack-profile.md`), `extend-skillset`, `audit-toolchain`, `audit-security`, and the shared contracts every plugin links into: `engineering-principles`, `stack-profile`, `version-protocol`, `security-baseline`, `logging-contract`, `observability`, `tech-radar`.
+- **`backendskills` (15 skills)** — the Hono/Go/FastAPI service scaffolds, plus `design-http-api`, `set-up-database`, `set-up-background-jobs`, `set-up-backend-auth`, `harden-backend`, `set-up-observability`, `configure-backend-tests`, `set-up-supabase`, `secure-supabase-rls`, `build-supabase-edge-function`, `build-nextjs-backend`, `set-up-nextjs-supabase-auth`.
+- **`infraskills` (8 skills)** — `containerize-service`, `set-up-opentofu`, `deploy-to-vercel`, `deploy-to-hetzner`, `deploy-to-ionos`, `set-up-delivery-pipeline`, `manage-secrets`, `deploy-otel-collector`.
+- **`cliskills` (3 skills)** — `build-cli`, `release-cli`, `set-up-dev-toolchain`.
+- **`aiskills` (5 skills)** — `build-llm-seam`, `build-rag-pipeline`, `set-up-llm-evals`, `build-mcp-server`, `secure-llm-features`.
+- **`gameskills` (5 skills)** — `scaffold-bevy-game`, `structure-bevy-app`, `manage-bevy-assets`, `test-bevy-systems`, `optimize-bevy-game`, on Bevy 0.20.
+- **Dependabot** watches the GitHub Actions workflows.
+
+### Changed
+- **Every frontend and landing skill reads `.claude/stack-profile.md` first** — package manager, framework/meta, test layout, hosting and backend track come from the profile; `nuxt`/`next` metas stop the skill and point at the framework's own mechanism where it owns routing, head, i18n or PWA.
+- **`configure-ci` and `set-up-security-headers` branch on hosting** — Netlify, Vercel (`vercel.json`, preview deploys) and self-hosted (Caddy, nginx, Traefik) each get their own pipeline and header set, with the CSP defined once.
+- **Skill descriptions are capped at 300 characters** — the listing budget on every turn.
+- **Verify steps run `pnpm typecheck`** (`tsc -b` / `vue-tsc -b`) instead of `tsc --noEmit`.
+- **`configure-analytics` — consent is required by default** (TDDDG §25): cookieless is a provider preference, not an exemption, and consent is checked per request, so it can be withdrawn.
+- **`set-up-pwa`** — persists an allow-listed TanStack Query cache to IndexedDB (`buster`, `removeClient()` on logout) instead of the whole cache to `localStorage`.
+- **`set-up-routing`** — `routeTree.gen.ts` is committed (excluded from Biome) so the CI typecheck passes on a clean checkout.
+- **`set-up-motion`** — Vue motion via `motion-v` (`@vueuse/motion` is unmaintained); reduced-motion gating through one root `<MotionConfig reducedMotion="user">`.
+- **`write-commit-messages` scales to the change** — trivial commits get the subject only; `Why:` stays mandatory.
+- **`scripts/validate.sh`** — validates the whole marketplace: plugin ownership of every skill, version agreement across manifests, description length and YAML-safety, unique skill names.
+- **CI** — the GitHub Actions used by the workflows are pinned by commit SHA.
+
+### Fixed
+- **`tsc --noEmit` passed vacuously in the Vite 8 templates** — the root `files: []` + references meant it checked zero files and exited 0 on a real type error; the typecheck script is now `tsc -b` / `vue-tsc -b`, in 20+ files across the set.
+- **The pre-paint theme script was blocked by the catalogue's own CSP** (`script-src 'self'`, no `unsafe-inline`), so dark mode flashed light in production — moved to `public/theme-init.js`.
+- **`set-up-pwa` persisted `/auth/me` to `localStorage`** through the whole-cache persister, contradicting the no-sensitive-storage stance — closed by the IndexedDB allow-list above.
+- **`sendDefaultPii: false` no longer compiles in Sentry 11**, and v11 collects user info, cookies, headers and bodies by default — replaced with an explicit `dataCollection` setting.
+- **`baseUrl` is error TS5101 in TS 6 and removed in TS 7** — dropped from `configure-typescript`; `paths` alone works.
+- **`set-up-realtime` reconnected with no subscribers** — `prev === 'reconnecting'` missed the `offline → online` recovery, and `JSON.parse('null')` crashed the message handler; fixed, with an `idle` status and a passing browser test.
+- **Relative MSW handlers (`/todos`) never match in Node** ("Failed to parse URL") — now `*/todos` with the API origin in `.env.test`.
+- **FAQ rich results are retired** — Google stopped showing them for all sites on 2026-05-07; `set-up-seo` states the date and stops recommending the markup.
+- **Landing descriptions were 358–469 characters**, over the 300 budget — all five rewritten, still "Use when"; four frontend descriptions (312–337) likewise.
+- **The installed plugin's commit/PR skills now come from `devcore`** — see Breaking.
+
+### Breaking
+- **The root `.claude-plugin/plugin.json` is removed** — a root manifest would leak every catalogue into every plugin; each plugin now owns its manifest.
+- **`write-commit-messages` and `write-pull-requests` moved from `frontendskills` to `devcore`** — installed automatically as a dependency, so existing installs keep both skills.
+- **`skills/workflow/` is now `skills/core/`.**
+
 ## [0.6.0] — 2026-10-09
 
 ### Added
