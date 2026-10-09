@@ -21,6 +21,8 @@ Append to `src/platform/problem.ts` (the scaffold's `AppError` stays as is):
 ```ts
 export const unauthenticated = () => new AppError(401, 'Unauthorized');
 export const forbidden = () => new AppError(403, 'Forbidden');
+export const keySourceUnavailable = () =>
+  new AppError(503, 'Service Unavailable', { detail: 'Identity provider keys unavailable' });
 ```
 
 ### `src/platform/auth.ts`
@@ -29,7 +31,7 @@ export const forbidden = () => new AppError(403, 'Forbidden');
 import { createMiddleware } from 'hono/factory';
 import { createRemoteJWKSet, errors, type JWTVerifyGetKey, jwtVerify } from 'jose';
 import { z } from 'zod';
-import { unauthenticated } from './problem.ts';
+import { keySourceUnavailable, unauthenticated } from './problem.ts';
 
 /** Who is calling. Built once here; routes and services never see the raw token. */
 export type Principal = {
@@ -71,8 +73,16 @@ export function createAuth(config: AuthConfig) {
         scopes: new Set(parsed.scope.split(' ').filter(Boolean)),
       };
     } catch (err) {
+      // A key-source outage is 503, not 401: the IdP is down, the caller's token is fine.
+      const KEY_SOURCE_DOWN = new Set(['ERR_JOSE_GENERIC', 'ERR_JWKS_TIMEOUT', 'ERR_JWKS_INVALID']);
+      if (
+        (err instanceof errors.JOSEError && KEY_SOURCE_DOWN.has(err.code)) ||
+        err instanceof TypeError // a network refusal is a fetch TypeError, not a JOSEError
+      ) {
+        throw keySourceUnavailable();
+      }
       if (err instanceof errors.JOSEError || err instanceof z.ZodError) throw unauthenticated();
-      throw err; // a JWKS fetch failure is an outage, not a bad token: let it become a 5xx
+      throw err; // not a token problem and not a key-source outage: unexpected, become a 5xx
     }
   }
 
@@ -461,6 +471,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -477,10 +488,80 @@ type Principal struct {
 
 func (p Principal) HasScope(s string) bool { _, ok := p.Scopes[s]; return ok }
 
-var ErrUnauthenticated = errors.New("unauthenticated")
+var (
+	ErrUnauthenticated      = errors.New("unauthenticated")
+	ErrKeySourceUnavailable = errors.New("identity provider keys unavailable")
+)
+
+// KeySourceError marks a JWKS fetch failure: the IdP or the network is down, not a bad token.
+type KeySourceError struct {
+	Err error
+}
+
+func (e *KeySourceError) Error() string { return "identity provider keys unavailable: " + e.Err.Error() }
+func (e *KeySourceError) Unwrap() error { return e.Err }
+
+// keySourceRoundTripper turns a transport error or a non-2xx JWKS response into a typed
+// *KeySourceError. It wraps the http.Client that go-oidc uses for its JWKS fetch.
+type keySourceRoundTripper struct {
+	next http.RoundTripper
+}
+
+func (rt *keySourceRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := rt.next.RoundTrip(req)
+	if err != nil {
+		return nil, &KeySourceError{Err: err}
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		resp.Body.Close()
+		return nil, &KeySourceError{Err: fmt.Errorf("jwks endpoint returned %s", resp.Status)}
+	}
+	return resp, nil
+}
+
+// RemoteKeySet returns the production key set: oidc.NewRemoteKeySet with a wrapped client, so a
+// JWKS outage is a typed KeySourceError, not a silent 401. Create it lazily; startup must not
+// depend on the IdP being reachable.
+func RemoteKeySet(ctx context.Context, jwksURL string) oidc.KeySet {
+	client := &http.Client{Transport: &keySourceRoundTripper{next: http.DefaultTransport}}
+	return oidc.NewRemoteKeySet(oidc.ClientContext(ctx, client), jwksURL)
+}
+
+// keySourceHolder carries a per-request KeySourceError out of the key-set wrapper to Verify.
+type keySourceHolder struct {
+	err *KeySourceError
+}
+
+type keySourceHolderKey struct{}
+
+func withKeySourceHolder(ctx context.Context) (context.Context, *keySourceHolder) {
+	h := &keySourceHolder{}
+	return context.WithValue(ctx, keySourceHolderKey{}, h), h
+}
+
+// detectKeySource wraps a KeySet so a KeySourceError survives go-oidc. go-oidc's verifier
+// collapses the error chain with %v ("failed to verify signature: %v"), so errors.As on the
+// returned error cannot see a KeySourceError. This wrapper catches it at VerifySignature, before
+// the collapse, and stashes it in the request context for Verify to read.
+type detectKeySource struct {
+	keys oidc.KeySet
+}
+
+func (d *detectKeySource) VerifySignature(ctx context.Context, raw string) ([]byte, error) {
+	payload, err := d.keys.VerifySignature(ctx, raw)
+	if err != nil {
+		var ks *KeySourceError
+		if errors.As(err, &ks) {
+			if h, ok := ctx.Value(keySourceHolderKey{}).(*keySourceHolder); ok {
+				h.err = ks
+			}
+		}
+	}
+	return payload, err
+}
 
 type Config struct {
-	Keys        oidc.KeySet // oidc.NewRemoteKeySet in production, oidc.StaticKeySet in tests
+	Keys        oidc.KeySet // auth.RemoteKeySet in production, oidc.StaticKeySet in tests
 	Issuer      string
 	Audience    string
 	TenantClaim string
@@ -495,7 +576,7 @@ type Verifier struct {
 func NewVerifier(c Config) *Verifier {
 	return &Verifier{
 		tenantClaim: c.TenantClaim,
-		v: oidc.NewVerifier(c.Issuer, c.Keys, &oidc.Config{
+		v: oidc.NewVerifier(c.Issuer, &detectKeySource{keys: c.Keys}, &oidc.Config{
 			ClientID:             c.Audience,                                          // checked against `aud`
 			SupportedSigningAlgs: []string{"RS256", "ES256"},                          // allow-list; never trust the token's own alg
 			Now:                  func() time.Time { return time.Now().Add(-c.Skew) }, // widens the exp check by Skew
@@ -504,8 +585,12 @@ func NewVerifier(c Config) *Verifier {
 }
 
 func (a *Verifier) Verify(ctx context.Context, raw string) (Principal, error) {
+	ctx, holder := withKeySourceHolder(ctx)
 	tok, err := a.v.Verify(ctx, raw) // signature, iss, aud, exp
 	if err != nil {
+		if holder.err != nil {
+			return Principal{}, ErrKeySourceUnavailable
+		}
 		return Principal{}, ErrUnauthenticated
 	}
 	var claims map[string]any
@@ -543,6 +628,10 @@ func (a *Verifier) Authenticate(next http.Handler) http.Handler {
 		}
 		p, err := a.Verify(r.Context(), raw)
 		if err != nil {
+			if errors.Is(err, ErrKeySourceUnavailable) {
+				keySourceUnavailable(w)
+				return
+			}
 			unauthorized(w)
 			return
 		}
@@ -555,6 +644,15 @@ func unauthorized(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(http.StatusUnauthorized)
 	_, _ = w.Write([]byte(`{"type":"about:blank","title":"Unauthorized","status":401}`))
+}
+
+// keySourceUnavailable is an outage (the IdP is down), not a bad token: 503 tells the client to
+// retry and surfaces in monitoring. The client keeps its session.
+func keySourceUnavailable(w http.ResponseWriter) {
+	w.Header().Set("Retry-After", "30")
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(http.StatusServiceUnavailable)
+	_, _ = w.Write([]byte(`{"type":"about:blank","title":"Service Unavailable","status":503}`))
 }
 ```
 
@@ -745,11 +843,11 @@ if rec.status == http.StatusUnauthorized || rec.status == http.StatusForbidden {
 a.deps.Log.Log(r.Context(), level, "request", /* same attributes as before */)
 ```
 
-`main.go` builds the verifier once. `oidc.NewRemoteKeySet` fetches lazily, so startup does not depend on the IdP. It keeps the context it is given and uses it for every later JWKS fetch, so pass a process-lifetime context, never one tied to startup or signals:
+`main.go` builds the verifier once. `auth.RemoteKeySet` wraps `oidc.NewRemoteKeySet` with the outage-detecting client and fetches lazily, so startup does not depend on the IdP. It keeps the context it is given and uses it for every later JWKS fetch, so pass a process-lifetime context, never one tied to startup or signals:
 
 ```go
 verifier := auth.NewVerifier(auth.Config{
-	Keys:        oidc.NewRemoteKeySet(context.Background(), cfg.OIDCJWKSURL),
+	Keys:        auth.RemoteKeySet(context.Background(), cfg.OIDCJWKSURL),
 	Issuer:      cfg.OIDCIssuer,
 	Audience:    cfg.OIDCAudience,
 	TenantClaim: cfg.OIDCTenantClaim,
@@ -930,6 +1028,10 @@ def unauthenticated() -> AppError:
     return AppError(401, "Unauthorized")
 
 
+def key_source_unavailable() -> AppError:
+    return AppError(503, "Service Unavailable")
+
+
 def forbidden() -> AppError:
     return AppError(403, "Forbidden")
 ```
@@ -942,9 +1044,9 @@ from typing import Annotated, Protocol
 
 import jwt
 from fastapi import Depends, Request
-from jwt import PyJWKClient, PyJWTError
+from jwt import PyJWKClient, PyJWKClientConnectionError, PyJWTError
 
-from svc.platform.problem import unauthenticated
+from svc.platform.problem import key_source_unavailable, unauthenticated
 
 
 @dataclass(frozen=True, slots=True)
@@ -1010,6 +1112,9 @@ def current_principal(request: Request) -> Principal:
     verifier: Verifier = request.app.state.verifier
     try:
         principal = verifier.verify(token)
+    except PyJWKClientConnectionError:
+        # A key-source outage is 503, not 401: catch this before PyJWTError (it is a subclass).
+        raise key_source_unavailable() from None
     except PyJWTError:
         raise unauthenticated() from None
     request.state.principal = principal  # for the rate limiter key

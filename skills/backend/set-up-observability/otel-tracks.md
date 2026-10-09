@@ -19,7 +19,9 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 register('@opentelemetry/instrumentation/hook.mjs', import.meta.url);
 
 const sdk = new NodeSDK({
-  // No traceExporter: NodeSDK builds an OTLP exporter from OTEL_EXPORTER_OTLP_* itself.
+  // No traceExporter on purpose: with OTEL_TRACES_EXPORTER unset (default "otlp"), NodeSDK builds the OTLP
+  // trace exporter from OTEL_EXPORTER_OTLP_* itself. Verified 2026-10-09 with sdk-node 0.223.0: a span was
+  // POSTed to <endpoint>/v1/traces with only env set. Metrics need the explicit reader below.
   metricReaders: [new PeriodicExportingMetricReader({ exporter: new OTLPMetricExporter() })],
   instrumentations: [
     getNodeAutoInstrumentations({

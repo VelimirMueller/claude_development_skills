@@ -114,13 +114,14 @@ export const Route = createFileRoute('/dashboard')({
   component: () => <h1>Dashboard</h1>,
 });
 ```
-After login, send the user to `redirect` only if it is a same-origin path: starts with `/`, not `//`, no scheme. An unchecked value is an open redirect that phishing links abuse.
+After login, send the user to `redirect` only if it is a same-origin path: starts with `/`, no backslash, and its normalised path does not start with `//` (`/.//evil.com` becomes `//evil.com`). An unchecked value is an open redirect that phishing links abuse.
 ```ts
 // src/libs/safeRedirect.ts
 export function safeRedirect(target: unknown, fallback = '/'): string {
-  return typeof target === 'string' && target.startsWith('/') && !target.startsWith('//') && !target.includes('\\')
-    ? target
-    : fallback;
+  if (typeof target !== 'string' || !target.startsWith('/') || target.includes('\\')) return fallback;
+  // Check the path a browser will actually use: '/.//evil.com' normalises to '//evil.com' (protocol-relative).
+  const { pathname, search, hash } = new URL(target, 'https://placeholder.invalid');
+  return pathname.startsWith('//') ? fallback : `${pathname}${search}${hash}`;
 }
 ```
 Vue: in `router.beforeEach`, `await queryClient.ensureQueryData(currentUserQueryOptions)` (or read a Pinia auth store hydrated from it) and redirect if absent.

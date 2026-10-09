@@ -21,8 +21,13 @@ Reference for [set-up-backend-auth](SKILL.md). Each rule maps to [security-basel
 
 ## Rule: Cache the JWKS, refetch on an unknown key, and treat a JWKS outage as a 5xx
 **Why:** Fetching keys per request adds latency and an outage dependency to every call. Never refetching breaks on key rotation. A JWKS fetch failure is the IdP being down, not the caller sending a bad token: answering 401 sends clients into a login loop.
-**How to apply:** `createRemoteJWKSet` (jose, with `cooldownDuration` so a flood of bogus `kid` values cannot hammer the IdP), `oidc.NewRemoteKeySet` (go-oidc), `PyJWKClient(cache_keys=True, lifespan=600)`. Create them lazily: the service must start while the IdP is unreachable. Catch only the library's token errors and map them to 401; let transport errors propagate to the generic 500/503 path. `PyJWKClient` fetches with blocking `urllib`: call it from a sync dependency, which FastAPI runs in the threadpool, never from `async def`.
+**How to apply:** `createRemoteJWKSet` (jose, with `cooldownDuration` so a flood of bogus `kid` values cannot hammer the IdP), `oidc.NewRemoteKeySet` (go-oidc), `PyJWKClient(cache_keys=True, lifespan=600)`. Create them lazily: the service must start while the IdP is unreachable. Map token errors to 401 and key-source outages to 503 (see [Rule: An IdP outage is a 503, not a 401](#rule-an-idp-outage-is-a-503-not-a-401)). `PyJWKClient` fetches with blocking `urllib`: call it from a sync dependency, which FastAPI runs in the threadpool, never from `async def`.
 **When to deviate:** None. Pre-warming the cache at boot is fine if a failure only logs a warning.
+
+## Rule: An IdP outage is a 503, not a 401
+**Why:** A 401 says the token is bad; a well-behaved client drops the session and re-logins, or loops. A JWKS fetch failure is the IdP or the network, not the caller: answer 503 so clients retry and monitoring sees an outage instead of a login-loop storm.
+**How to apply:** Map a key-source failure to `503 problem+json "Service Unavailable"` with a `Retry-After: 30` header. Keep 401 for token problems, including an unknown `kid` (that is a token problem, not an outage). The per-track code is in [auth-tracks.md](auth-tracks.md).
+**When to deviate:** None. A key-source outage is never the caller's fault.
 
 ## Rule: Build a Principal once; nothing below sees the token
 **Why:** A handler that reads claims from the raw token re-implements parsing and spreads trust decisions through the codebase. A `Principal` (`sub`, `tenantId`, `scopes`) is the validated fact; the token is an input to producing it.

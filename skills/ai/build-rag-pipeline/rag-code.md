@@ -410,10 +410,13 @@ const Case = z.object({ id: z.string(), tenant: z.string(), query: z.string(), r
 
 // Usage: tsx evals/retrieval.ts evals/datasets/retrieval.jsonl   (DATABASE_URL, VOYAGE_API_KEY from the environment)
 const file = process.argv[2];
-if (!file || !process.env.DATABASE_URL || !process.env.VOYAGE_API_KEY) throw new Error('usage: retrieval.ts <dataset.jsonl>; needs DATABASE_URL and VOYAGE_API_KEY');
+// VOYAGE_BASE_URL has no default: Atlas model API keys need https://ai.mongodb.com/v1, Voyage platform keys
+// https://api.voyageai.com/v1 (both answer 401 to the other's key), so a silent default fails for half the users.
+if (!file || !process.env.DATABASE_URL || !process.env.VOYAGE_API_KEY || !process.env.VOYAGE_BASE_URL)
+  throw new Error('usage: retrieval.ts <dataset.jsonl>; needs DATABASE_URL, VOYAGE_API_KEY and VOYAGE_BASE_URL');
 const cases = readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l) => Case.parse(JSON.parse(l)));
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const embedder = voyageEmbedder({ apiKey: process.env.VOYAGE_API_KEY, model: 'voyage-4', dimensions: 1024, baseUrl: process.env.VOYAGE_BASE_URL ?? 'https://ai.mongodb.com/v1' });
+const embedder = voyageEmbedder({ apiKey: process.env.VOYAGE_API_KEY, model: 'voyage-4', dimensions: 1024, baseUrl: process.env.VOYAGE_BASE_URL });
 
 const rows = [];
 for (const c of cases) {
