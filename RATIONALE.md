@@ -132,7 +132,7 @@ rules as commandments**, to get **judgment instead of cargo cult.**
 
 A rule without a reason is dogma, and dogma is how juniors ship the wrong thing confidently.
 So every reference file ends with *When to deviate*: co-located tests are fine if your team
-prefers them; Biome can own formatting too if you do not need Prettier's Tailwind sort; jsdom
+prefers them; a work repo with its own Prettier/ESLint setup keeps it; jsdom
 beats real-browser tests when you need raw speed over fidelity. The skill teaches the default
 *and the conditions under which the default is wrong.* That is what a senior actually
 transmits to a junior — not "do this," but "do this, because, except when."
@@ -171,8 +171,8 @@ I chose **bending the plugin to how you actually work** over **my own defaults**
 
 Tests belong in `tests/` by type, not co-located — so the structure skill stopped emitting
 co-located specs and the de-location rippled coherently through every reference. The toolchain
-is pnpm, Biome, Prettier, Node LTS — so the version policy and the linting skill were written
-to that, not to ESLint. Planning docs do not belong in the published repo — so they stayed
+is pnpm, Biome (lint and format, since v0.6.0), Node LTS — so the version policy and the linting
+skill were written to that, not to ESLint or Prettier. Planning docs do not belong in the published repo — so they stayed
 local and only the deliverables were committed. A *personal* skill plugin that imposed my
 defaults over yours would defeat its own purpose; the whole point is that it encodes **your**
 judgment, so that Claude works the way you would.
