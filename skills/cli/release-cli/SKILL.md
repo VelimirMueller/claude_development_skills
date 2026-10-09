@@ -38,7 +38,7 @@ Pick from `languages` in the profile or from step 1:
 | Language | Pipeline | Signing / provenance |
 |---|---|---|
 | TypeScript | npm trusted publishing; `tsdown` build, `pnpm pack` + `npm publish` | npm provenance (automatic with trusted publishing) |
-| Go | GoReleaser; `homebrew_casks` into the tap | cosign keyless signature on `checksums.txt`, syft SBOM |
+| Go | GoReleaser; `homebrew_casks` with a `binary` stanza into the tap (`brews` is deprecated since GoReleaser v2.10; see [release-patterns.md](release-patterns.md)) | cosign keyless signature on `checksums.txt`, syft SBOM |
 | Python | `uv build --no-sources` + `uv publish --trusted-publishing always`; PyPI pending publisher | PyPI attestations (automatic with `uv publish`) |
 | Rust | cargo-dist: `dist init` / `generate` / `plan` | `github-attestations = true`; `github-action-commits` SHA pins |
 

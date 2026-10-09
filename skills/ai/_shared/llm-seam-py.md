@@ -160,9 +160,10 @@ class Redacted:
         return pattern.sub(lambda m: self._map[m.group(0)], output)
 
 
-def redact(text: str) -> Redacted:
-    """Best-effort pattern redaction. It does NOT find names or addresses; see seam-patterns.md."""
-    mapping: dict[str, str] = {}
+def redact(text: str, mapping: dict[str, str] | None = None) -> Redacted:
+    """Best-effort pattern redaction. It does NOT find names or addresses; see seam-patterns.md.
+    Pass a shared mapping to keep placeholder numbering continuous across separately redacted strings."""
+    mapping = {} if mapping is None else mapping
 
     def swap(name: str):
         def inner(m: re.Match[str]) -> str:
@@ -350,8 +351,16 @@ class Llm:
 
     async def generate(self, req: LlmRequest[T], on_text: Callable[[str], None] | None = None) -> LlmResult[T]:
         tier = self._cfg["tiers"][req.tier]
-        prompt = load_prompt(self._prompts_dir, req.prompt_name, req.prompt_vars)
-        reds = [redact(m["content"]) if req.pii == "redact" else None for m in req.messages]
+        reds: list[Redacted | None] = []
+        if req.pii == "redact":
+            # Redacting vars changes the system text only when a var holds PII; cacheable prompts cannot take vars, so caching is unaffected.
+            mapping: dict[str, str] = {}
+            var_reds = {k: redact(v, mapping) for k, v in req.prompt_vars.items()}
+            prompt = load_prompt(self._prompts_dir, req.prompt_name, {k: r.text for k, r in var_reds.items()})
+            reds = [redact(m["content"], mapping) for m in req.messages] + list(var_reds.values())
+        else:
+            prompt = load_prompt(self._prompts_dir, req.prompt_name, req.prompt_vars)
+            reds = [None for _ in req.messages]
         messages = [{"role": m["role"], "content": r.text if r else m["content"]} for m, r in zip(req.messages, reds)]
         timeout_s = self._cfg["timeoutMs"] / 1000
         deadline = timeout_s * (self._cfg["maxRetries"] + 1)  # one deadline for the logical call, retries included
@@ -399,9 +408,14 @@ class Llm:
 
     async def count_tokens(self, req: LlmRequest[T]) -> int:
         """Input tokens the request would use (redaction applied, as in generate). For worst-case budget checks."""
-        prompt = load_prompt(self._prompts_dir, req.prompt_name, req.prompt_vars)
-        messages = [{"role": m["role"], "content": redact(m["content"]).text if req.pii == "redact" else m["content"]}
-                    for m in req.messages]
+        if req.pii == "redact":
+            mapping: dict[str, str] = {}
+            prompt = load_prompt(self._prompts_dir, req.prompt_name,
+                                 {k: redact(v, mapping).text for k, v in req.prompt_vars.items()})
+            messages = [{"role": m["role"], "content": redact(m["content"], mapping).text} for m in req.messages]
+        else:
+            prompt = load_prompt(self._prompts_dir, req.prompt_name, req.prompt_vars)
+            messages = [{"role": m["role"], "content": m["content"]} for m in req.messages]
         return await self._adapter.count_tokens(self._cfg["tiers"][req.tier]["model"], prompt.system, messages)
 
     async def _with_retry(self, fn: Callable[[], Any], span: trace.Span, retries: int) -> Any:
@@ -525,6 +539,27 @@ async def test_restores_redacted_values_in_structured_output():
     fake = Fake([Summary(summary="Mail [EMAIL_1] about the crash", priority=2)])
     r = await make(fake).generate(req())
     assert r.output.summary == "Mail jane@example.com about the crash"
+
+
+async def test_redacts_prompt_vars_before_substitution_and_restores():
+    fake = Fake(["Notify [EMAIL_1] today"])
+    r = await make(fake).generate(req(
+        prompt_name="notify", prompt_vars={"email": "bob@example.com"},
+        messages=[{"role": "user", "content": "The app crashes."}], schema=None))
+    assert "bob@example.com" not in fake.calls[0].prompt.system
+    assert "[EMAIL_1]" in fake.calls[0].prompt.system
+    assert r.output == "Notify bob@example.com today"
+
+
+async def test_no_placeholder_collision_between_var_and_message():
+    fake = Fake(["Mail [EMAIL_1] and [EMAIL_2]"])
+    r = await make(fake).generate(req(
+        prompt_name="notify", prompt_vars={"email": "bob@example.com"},
+        messages=[{"role": "user", "content": "Also cc carol@example.com"}], schema=None))
+    assert "[EMAIL_1]" in fake.calls[0].prompt.system
+    assert "[EMAIL_2]" in fake.calls[0].messages[0]["content"]
+    assert "carol@example.com" not in fake.calls[0].messages[0]["content"]
+    assert r.output == "Mail bob@example.com and carol@example.com"
 
 
 def test_redact_card():

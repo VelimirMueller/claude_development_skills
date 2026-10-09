@@ -50,7 +50,8 @@ done
 for DIR in $(jq -r '.plugins[].skills[]' "$MARKET"); do
   [ -d "$DIR" ] || fail "$MARKET lists $DIR, which does not exist"
 done
-jq -e '.plugins[].dependencies[]? | (type == "string") or (type == "object" and (.name | type == "string") and (.name | length > 0))' "$MARKET" >/dev/null \
+# all() over the collected list: true for a marketplace with no dependencies (jq -e on an empty stream exits non-zero)
+jq -e '[.plugins[].dependencies[]?] | all((type == "string" and length > 0) or (type == "object" and (.name | type == "string") and (.name | length > 0)))' "$MARKET" >/dev/null \
   || fail "a dependency in $MARKET is neither a string nor an object with a non-empty name"
 for DEP in $(jq -r '.plugins[].dependencies[]? | if type == "string" then . else .name end' "$MARKET" | sort -u); do
   jq -e --arg d "$DEP" '.plugins | any(.name == $d)' "$MARKET" >/dev/null || fail "dependency '$DEP' is not a plugin in $MARKET"
