@@ -34,7 +34,7 @@ dev = [
 [tool.fastapi]
 entrypoint = "svc.main:app"
 
-[tool.pytest]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

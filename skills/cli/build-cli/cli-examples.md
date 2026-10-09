@@ -216,6 +216,9 @@ export async function main(argv: string[]): Promise<number> {
   }
 }
 
+// import.meta.main: Node >= 22.18 / 24.2 (the floor in ../_shared/stack-versions.md). Do not swap it for
+// `import.meta.url === pathToFileURL(process.argv[1]).href`: an npm-installed bin is a symlink, argv[1] is the
+// link and import.meta.url the resolved file, so that check is false and the CLI exits 0 doing nothing.
 if (import.meta.main) process.exitCode = await main(process.argv.slice(2));
 ```
 

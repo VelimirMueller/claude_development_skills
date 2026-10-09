@@ -677,12 +677,12 @@ func TestProtectedRoutesRejectMissingToken(t *testing.T) {
 
 ## Python
 
-The tests directories are packages (`__init__.py` in `tests`, `tests/unit`, `tests/integration`, `tests/support`) so `tests.support` imports resolve. The scaffold's `[tool.pytest]` block gains the marker line:
+The tests directories are packages (`__init__.py` in `tests`, `tests/unit`, `tests/integration`, `tests/support`) so `tests.support` imports resolve. The scaffold's `[tool.pytest.ini_options]` block gains the marker line:
 
 ### `pyproject.toml` (pytest section, as modified)
 
 ```toml
-[tool.pytest]
+[tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["integration: needs Docker (real Postgres)"]
 asyncio_mode = "auto"
