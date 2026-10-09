@@ -72,7 +72,7 @@ Defaults: tiers `quality` = `claude-opus-5-5`, `balanced` = `claude-sonnet-5-5`,
 ## 7. Verify
 
 ```bash
-pnpm tsc --noEmit && pnpm vitest run tests/llm.test.ts     # Python: uv run pyright && uv run pytest tests/test_llm.py
+pnpm typecheck && pnpm vitest run tests/llm.test.ts     # Python: uv run pyright && uv run pytest tests/test_llm.py
 grep -rnE "claude-(opus|sonnet|haiku|fable)-|from ['\"]@anthropic-ai/sdk" src | grep -v platform/llm   # expect: no output
 ```
 

@@ -52,7 +52,7 @@ The scripts live in `deploy/stack/bin/`, so the deploy bundle ships them to `/op
 ## Rule: the hostname comes from the environment, through Traefik's file templating
 
 **Why:** The stack is one set of files for every environment, and the hostname differs per environment. Hard-coding it forces a second copy of the Traefik file.
-**How to apply:** `deploy/envs/<env>/config.env` sets `APP_HOST=stg.shop.example.com` (plus `COMPOSE_PROJECT_NAME` and `DATA_DIR=/srv/data`). The Traefik service passes `APP_HOST` into its environment and `dynamic.yaml` reads it with ``Host(`{{ env "APP_HOST" }}`)``. Verified: with `APP_HOST=stg.shop.test` a request for that host returned 200 and a request for another host returned 404. The ACME email sits in the static `traefik.yaml` (one ops address for all environments), because Traefik reads static configuration from one source only, file or environment, never both.
+**How to apply:** `deploy/envs/<env>/config.env` sets `APP_HOST=stg.shop.example.com` (plus `COMPOSE_PROJECT_NAME` and `DATA_DIR=/srv/data`). The Traefik service passes `APP_HOST` into its environment and `dynamic.yaml` reads it with ``Host(`{{ env "APP_HOST" }}`)``. Verified: with `APP_HOST=stg.shop.test` a request for that host returned 200 and a request for another host returned 404 — so Traefik v3's file provider renders Go templates in a plain `dynamic.yaml`; no `.tmpl` suffix is needed. The ACME email sits in the static `traefik.yaml` (one ops address for all environments), because Traefik reads static configuration from one source only, file or environment, never both.
 **Anti-example:** `compose.prd.yaml` and `dynamic.prd.yaml` copies that drift from the dev ones.
 
 ## The files, verbatim

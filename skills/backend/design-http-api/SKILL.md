@@ -76,9 +76,11 @@ Go: `//go:generate go tool oapi-codegen -config oapi-codegen.yaml ../../openapi.
 
 ## 7. Verify
 
+In a Vite frontend `typecheck` is `tsc -b`; `tsc --noEmit` checks zero files there (see ../../frontend/_shared/conventions.md).
+
 ```bash
 pnpm api:check                         # spec and types regenerate with no diff
-pnpm exec tsc --noEmit                 # a call with a wrong param type fails to compile
+pnpm typecheck                 # a call with a wrong param type fails to compile
 curl -si 'localhost:3000/<list-path>?limit=0' | sed -n '1p;/content-type/Ip'
 # expect: HTTP/1.1 400 ... content-type: application/problem+json
 oasdiff breaking origin/main:openapi.json openapi.json    # expect: no output (exit 0)

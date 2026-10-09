@@ -125,8 +125,10 @@ Unit-test `safeNextPath` (open-redirect cases) and the action validation; sign-i
 
 ## 9. Verify
 
+`typecheck` is `tsc --noEmit` in a Next.js app (one tsconfig); add `"typecheck": "tsc --noEmit"` to package.json if it is missing.
+
 ```bash
-pnpm tsc --noEmit && pnpm build
+pnpm typecheck && pnpm build
 pnpm supabase start                                   # local Auth + a local mail catcher (URL printed by `start`)
 curl -si http://localhost:3000/notes | head -3        # expect 307 → /login?next=%2Fnotes
 curl -si 'http://localhost:3000/auth/callback?code=bad' | grep -i location   # expect …/login?error=auth

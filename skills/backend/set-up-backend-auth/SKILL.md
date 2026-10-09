@@ -83,7 +83,7 @@ Paths follow [service-layout.md](../_shared/service-layout.md). The `documents` 
 ## 7. Verify
 
 ```bash
-pnpm tsc --noEmit && pnpm vitest run          # hono
+pnpm typecheck && pnpm vitest run          # hono
 go vet ./... && go test ./...                 # go
 uv run mypy && uv run pytest                  # fastapi
 ```

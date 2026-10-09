@@ -72,7 +72,7 @@ Design the tools **before** writing code: list the 3 to 7 things a user asks, ma
 ## 7. Verify
 
 ```bash
-pnpm tsc --noEmit && pnpm vitest run tests/server.test.ts           # in-memory client: tools, structured output, scoping, confirmation
+pnpm typecheck && pnpm vitest run tests/server.test.ts           # in-memory client: tools, structured output, scoping, confirmation
 npx @modelcontextprotocol/inspector --cli npx tsx src/stdio.ts --method tools/list
 npx @modelcontextprotocol/inspector --cli npx tsx src/stdio.ts --method tools/call --tool-name search_tickets --tool-arg status=open
 curl -si -X POST http://127.0.0.1:3000/mcp -H 'Content-Type: application/json' -d '{}' | grep -i www-authenticate

@@ -134,11 +134,13 @@ Add a `"db:types"` script (or a `just`/`mise` task per `task_runner`) and commit
 
 ## 9. Verify
 
+`typecheck` is `tsc --noEmit` in a Next.js app (one tsconfig); add `"typecheck": "tsc --noEmit"` to package.json if it is missing.
+
 ```bash
 pnpm supabase start && pnpm supabase db reset      # migrations + seed apply cleanly
 pnpm supabase test db                              # pgTAP green (or "no tests" before secure-supabase-rls)
 pnpm supabase db advisors --local --type security  # no ERROR-level findings
-pnpm tsc --noEmit                                  # Database types resolve
+pnpm typecheck                                  # Database types resolve
 pnpm build && ! grep -rEl "sb_secret_|SUPABASE_SECRET_KEY" .next/static dist 2>/dev/null   # nothing in client output
 ```
 

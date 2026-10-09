@@ -131,8 +131,10 @@ export async function createNoteAction(_previous: ActionResult<NoteDTO> | null, 
 
 ## 7. Verify
 
+`typecheck` is `tsc --noEmit` in a Next.js app (one tsconfig); add `"typecheck": "tsc --noEmit"` to package.json if it is missing.
+
 ```bash
-pnpm tsc --noEmit
+pnpm typecheck
 pnpm build                       # Cache Components errors name the exact uncached read or missing <Suspense>
 pnpm build && grep -rEl "sb_secret_|SUPABASE_SECRET_KEY" .next/static   # prints nothing
 ```
