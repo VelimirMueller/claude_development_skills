@@ -1,14 +1,33 @@
-# claude_development_skills
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner/hero-v1-light.svg">
+  <img alt="dev-skills — Opinions, packaged." src="assets/banner/hero-v1-dark.svg" width="100%">
+</picture>
 
-<sub>Claude Code marketplace `frontendskills` · seven plugins</sub>
+![status](https://img.shields.io/badge/status-stable-10b981?style=flat-square&labelColor=0a0a0b) ![version](https://img.shields.io/badge/version-0.7.1-8b5cf6?style=flat-square&labelColor=0a0a0b) ![group](https://img.shields.io/badge/VM.-vlm-8b5cf6?style=flat-square&labelColor=0a0a0b) ![stack](https://img.shields.io/badge/claude_code-plugins-a1a1aa?style=flat-square&labelColor=0a0a0b)
 
-**Senior engineering judgment — externalized as audit-first Claude Code skills: frontend to infra, one plugin per domain.**
+> Opinions, packaged.
 
-`73 skills` · `7 plugins` · `React 19 / Vue 3 · Hono / Go / FastAPI · Supabase / Next 16 · Vercel / Hetzner / IONOS · Rust + Bevy` · `MIT`
+```text
+█████   ██████  ██  ██
+██  ██  ██      ██  ██
+██  ██  █████   ██  ██  █████
+██  ██  ██       ████
+█████   ██████    ██
+ █████  ██  ██  ██████  ██      ██       █████
+██      ██ ██     ██    ██      ██      ██
+ ████   ████      ██    ██      ██       ████
+    ██  ██ ██     ██    ██      ██          ██
+█████   ██  ██  ██████  ██████  ██████  █████   ██
+```
 
----
+## // 01 WHAT IT DOES
 
-## The idea
+- Packages senior engineering judgment as **audit-first Claude Code skills**: frontend to infra, one plugin per domain.
+- Ships as the Claude Code marketplace `frontendskills`: `73 skills` in `7 plugins`, licensed `MIT`.
+- Covers `React 19 / Vue 3 · Hono / Go / FastAPI · Supabase / Next 16 · Vercel / Hetzner / IONOS · Rust + Bevy`.
+- Reads your stack profile first, applies only the missing move, and changes nothing on a second run.
+
+### The idea
 
 Every senior carries a body of judgment that rarely gets written down — where server state ends
 and UI state begins, why a token must never touch `localStorage`, what a "molecule" is. It lives
@@ -33,7 +52,7 @@ a template:
 
 Every rule ships with its *when to deviate*. The aim is judgment, not dogma.
 
-## Start here
+## // 02 QUICK START
 
 Add the marketplace and install `devcore`, then run the wizard:
 
@@ -71,9 +90,60 @@ One step per plugin (Claude Code 2.1.275 or later adds the marketplace on the wa
 /plugin install gameskills --marketplace VelimirMueller/claude_development_skills
 ```
 
-## The catalogue
+## // 03 HOW IT WORKS
 
-### devcore
+```text
+  you  ·  "add state management"  ·  "set up my stack profile"
+     │  Claude matches the skill's one-line "Use when" description
+     ▼
+  ┌────────────────────────┐   reads first   ┌─────────────────────────────┐
+  │  skill  (SKILL.md)     │ ──────────────▸ │  .claude/stack-profile.md   │
+  │  one of 73, 7 plugins  │                 │  written once by the wizard │
+  └───────────┬────────────┘                 └─────────────────────────────┘
+              │  1 audit   what is already there?
+              │  2 apply   only the missing move, behind one seam
+              │  3 verify  typecheck · tests
+              ▼
+  ┌────────────────────────┐
+  │  your repo             │   second run = no-op
+  └────────────────────────┘
+
+  devcore ◂── every other plugin depends on it (shared contracts)
+```
+
+### How it composes
+
+The skills interlock front-to-back. A greenfield frontend runs roughly:
+
+```
+scaffold → clean → configure-typescript → validate-env → configure-linting →
+set-up-frontend-structure → set-up-state-management → set-up-error-boundaries →
+configure-test-stack → set-up-routing → set-up-forms → set-up-auth → … → experience & polish
+```
+
+The router carries the `queryClient` in its context, so a route loader prefetches into the exact
+cache a component's hook reads; the auth guard reads that same context; the form's submit
+invalidates that same query key; realtime writes into it from a socket. Because every skill is
+audit-first, this is a guide, not a constraint: run any one against an existing project.
+
+A backend service and its deployment compose the same way:
+
+```
+set-up-stack-profile → scaffold-<track>-service → set-up-database → design-http-api →
+set-up-backend-auth → harden-backend → set-up-observability → configure-backend-tests →
+containerize-service → set-up-delivery-pipeline → deploy-to-<host> → deploy-otel-collector
+```
+
+The seams carry across the whole chain. Each service keeps its I/O vendors — db, logger, tracer,
+clock — behind one `platform/` seam; the frontend reaches it through its `fetcher` seam with the
+OpenAPI client `design-http-api` generated; one OpenTelemetry pipeline ships every service's
+telemetry to one collector; one `deploy.sh` contract is all `deploy-to-<host>` expects.
+
+## // 04 USAGE
+
+### The catalogue
+
+#### devcore
 
 - **`set-up-stack-profile`** — Detects the stack, asks only the gaps, writes `.claude/stack-profile.md`.
 - **`audit-security`** — Scans secrets, deps, authz, headers, CI; fixes only approved findings.
@@ -82,7 +152,7 @@ One step per plugin (Claude Code 2.1.275 or later adds the marketplace on the wa
 - **`write-commit-messages`** — A subject and body any developer can act on.
 - **`write-pull-requests`** — A description reviewers can follow end to end.
 
-### frontendskills
+#### frontendskills
 
 **Bootstrap & tooling**
 
@@ -142,7 +212,7 @@ One step per plugin (Claude Code 2.1.275 or later adds the marketplace on the wa
 These five audit *built HTML* from any stack and gate on the page-level question in
 [`skills/landing/_shared/page-types.md`](skills/landing/_shared/page-types.md): readable without JS?
 
-### backendskills
+#### backendskills
 
 **Service scaffolds**
 
@@ -171,7 +241,7 @@ These five audit *built HTML* from any stack and gate on the page-level question
 - **`set-up-nextjs-supabase-auth`** — Supabase Auth in Next 16: cookie clients, verified claims, PKCE.
 - **`set-up-supabase`** — CLI local stack, migrations-only schema, generated types, secret-safe client.
 
-### infraskills
+#### infraskills
 
 - **`containerize-service`** — Multi-stage Dockerfile per track: non-root, pinned, scanned.
 - **`deploy-otel-collector`** — One Compose collector per environment exporting to any OTLP backend.
@@ -182,13 +252,13 @@ These five audit *built HTML* from any stack and gate on the page-level question
 - **`set-up-delivery-pipeline`** — Trunk-based CI/CD: one image, promote dev→stg→prd by digest.
 - **`set-up-opentofu`** — OpenTofu layout, encrypted state, plan-as-artifact, drift detection.
 
-### cliskills
+#### cliskills
 
 - **`build-cli`** — Subcommands, typed args, `--json`, exit codes, `--dry-run`, tested.
 - **`release-cli`** — SemVer over the CLI surface, changelog-driven notes, signed artifacts.
 - **`set-up-dev-toolchain`** — mise or just, shared tasks, lefthook hooks, a doctor task.
 
-### aiskills
+#### aiskills
 
 - **`build-llm-seam`** — One module owns every model call: tiers, retries, structured output.
 - **`build-mcp-server`** — Task-shaped tools, read-only by default, typed inputs, tested.
@@ -196,7 +266,7 @@ These five audit *built HTML* from any stack and gate on the page-level question
 - **`secure-llm-features`** — Prompt-injection model, least-privilege tools, mapped to OWASP LLM Top 10.
 - **`set-up-llm-evals`** — Golden datasets, deterministic checks, a calibrated judge, CI gate.
 
-### gameskills
+#### gameskills
 
 - **`scaffold-bevy-game`** — A lib+bin cargo project with fast builds and optional wasm.
 - **`structure-bevy-app`** — Plugin-per-feature layout, app states, system ordering.
@@ -204,35 +274,7 @@ These five audit *built HTML* from any stack and gate on the page-level question
 - **`test-bevy-systems`** — Headless App/World tests with MinimalPlugins and deterministic time.
 - **`optimize-bevy-game`** — Measure first, then fix change detection, parallelism, allocations.
 
-## How it composes
-
-The skills interlock front-to-back. A greenfield frontend runs roughly:
-
-```
-scaffold → clean → configure-typescript → validate-env → configure-linting →
-set-up-frontend-structure → set-up-state-management → set-up-error-boundaries →
-configure-test-stack → set-up-routing → set-up-forms → set-up-auth → … → experience & polish
-```
-
-The router carries the `queryClient` in its context, so a route loader prefetches into the exact
-cache a component's hook reads; the auth guard reads that same context; the form's submit
-invalidates that same query key; realtime writes into it from a socket. Because every skill is
-audit-first, this is a guide, not a constraint: run any one against an existing project.
-
-A backend service and its deployment compose the same way:
-
-```
-set-up-stack-profile → scaffold-<track>-service → set-up-database → design-http-api →
-set-up-backend-auth → harden-backend → set-up-observability → configure-backend-tests →
-containerize-service → set-up-delivery-pipeline → deploy-to-<host> → deploy-otel-collector
-```
-
-The seams carry across the whole chain. Each service keeps its I/O vendors — db, logger, tracer,
-clock — behind one `platform/` seam; the frontend reaches it through its `fetcher` seam with the
-OpenAPI client `design-http-api` generated; one OpenTelemetry pipeline ships every service's
-telemetry to one collector; one `deploy.sh` contract is all `deploy-to-<host>` expects.
-
-## Team setup
+### Team setup
 
 For a team, commit the same setup to the project's `.claude/settings.json`, so everyone who
 trusts the folder gets the skills:
@@ -256,7 +298,7 @@ knowledge, not a secret, and it is what makes the author's defaults stay default
 
 Update with `/plugin marketplace update frontendskills`.
 
-## What a run looks like
+### What a run looks like
 
 Illustrative: `set-up-state-management` on a fresh `pnpm create vite` React app. You ask *"add
 state management"*; Claude matches the `Use when` line and works through it:
@@ -275,7 +317,7 @@ state management"*; Claude matches the `Use when` line and works through it:
 Run it a second time and step 1 finds everything in place: the skill exits with *"State
 management already in place."* and changes nothing.
 
-## Validate
+### Validate
 
 ```bash
 bash scripts/validate.sh
@@ -288,7 +330,7 @@ a `name` matching its folder and a description starting with "Use when", at most
 and valid YAML; that skill names are unique across catalogues; and that every relative `.md` link
 under `skills/` resolves. CI runs the same script on every pull request.
 
-## Further reading
+### Further reading
 
 - **[RATIONALE.md](RATIONALE.md)** — the design narrative: every load-bearing decision as *X over Y, for Z*.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the house style, and how to add a skill that fits.
@@ -302,12 +344,24 @@ under `skills/` resolves. CI runs the same script on every pull request.
 - **[skills/backend/_shared/service-layout.md](skills/backend/_shared/service-layout.md)** — one layering standard for TypeScript, Go, and Python.
 - **[skills/landing/_shared/page-types.md](skills/landing/_shared/page-types.md)** — the public-page gate and the priority inversion.
 
-## Status
+## // 05 STATUS
+
+| | |
+|---|---|
+| 🟢 **Stable** | 0.7.1 · one version for every plugin, the marketplace and the CHANGELOG |
+| Tests | `bash scripts/validate.sh` (CI runs it on every pull request) |
+| Changes | [`CHANGELOG.md`](CHANGELOG.md) |
+
+### Status
 
 **v0.7.1.** One marketplace, seven plugins, 73 skills. Every code block in the new catalogues
 was built and run in scratch projects on 2026-10-09, and anything not run is labelled unverified
 in place. Versions are floors in each catalogue's `_shared/stack-versions.md`.
 
-## License
+### License
 
 MIT © 2026 Velimir Müller.
+
+---
+
+<sub>VM. studio / vlm · open source · look per <code>vm-brand</code> playbook</sub>
