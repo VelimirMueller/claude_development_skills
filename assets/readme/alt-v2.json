@@ -1,0 +1,17 @@
+{
+  "divider-what-v2.svg": "01 WHAT IT DOES. Judgment, executable.",
+  "divider-start-v2.svg": "02 QUICK START. Two commands. One wizard.",
+  "divider-how-v2.svg": "03 HOW IT WORKS. Audit. Apply. Verify. No-op.",
+  "divider-usage-v2.svg": "04 USAGE. Seventy-three skills, condensed.",
+  "divider-status-v2.svg": "05 STATUS. One version, everywhere.",
+  "stats-v2-dark.svg": "73 skills across the set. 7 plugins, one per domain. 1 marketplace: frontendskills. 0 changes on a second run",
+  "stats-v2-light.svg": "73 skills across the set. 7 plugins, one per domain. 1 marketplace: frontendskills. 0 changes on a second run",
+  "features-v2-dark.svg": "Audit-first: Each skill reads what is already there and applies only the missing move. Run it twice: the second run is a no-op. Seams, not vendor calls: fetcher, captureError, env and queryKeys sit behind one point each. A vendor swap is a one-file change. Profile, not assumptions: The wizard writes .claude/stack-profile.md. Every skill reads it first, so defaults stay defaults",
+  "features-v2-light.svg": "Audit-first: Each skill reads what is already there and applies only the missing move. Run it twice: the second run is a no-op. Seams, not vendor calls: fetcher, captureError, env and queryKeys sit behind one point each. A vendor swap is a one-file change. Profile, not assumptions: The wizard writes .claude/stack-profile.md. Every skill reads it first, so defaults stay defaults",
+  "start-v2-dark.svg": "Terminal: $ /plugin marketplace add VelimirMueller/lab-claude-skills | $ /plugin install devcore@frontendskills | # then ask Claude to \"set up my stack profile\"",
+  "start-v2-light.svg": "Terminal: $ /plugin marketplace add VelimirMueller/lab-claude-skills | $ /plugin install devcore@frontendskills | # then ask Claude to \"set up my stack profile\"",
+  "flow-v2-dark.svg": "YOU ASK -> CLAUDE MATCHES -> AUDIT -> APPLY -> VERIFY. Run it twice and the second run is a no-op.",
+  "flow-v2-light.svg": "YOU ASK -> CLAUDE MATCHES -> AUDIT -> APPLY -> VERIFY. Run it twice and the second run is a no-op.",
+  "status-v2-dark.svg": "Marketplace: frontendskills. Version: v0.7.1 · one version everywhere. Plugins: 7 · 73 skills. Validate: bash scripts/validate.sh. CI: validate on every pull request",
+  "status-v2-light.svg": "Marketplace: frontendskills. Version: v0.7.1 · one version everywhere. Plugins: 7 · 73 skills. Validate: bash scripts/validate.sh. CI: validate on every pull request"
+}
