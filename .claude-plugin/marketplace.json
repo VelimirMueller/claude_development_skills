@@ -18,7 +18,7 @@
         "./skills/core/"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "stack-profile",
         "wizard",
@@ -41,7 +41,7 @@
         "devcore"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "frontend",
         "react",
@@ -65,7 +65,7 @@
         "devcore"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "backend",
         "hono",
@@ -90,7 +90,7 @@
         "devcore"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "infra",
         "opentofu",
@@ -114,7 +114,7 @@
         "devcore"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "cli",
         "mise",
@@ -135,7 +135,7 @@
         "devcore"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "llm",
         "rag",
@@ -157,7 +157,7 @@
         "devcore"
       ],
       "license": "MIT",
-      "homepage": "https://github.com/VelimirMueller/claude_development_skills",
+      "homepage": "https://github.com/VelimirMueller/lab-claude-skills",
       "keywords": [
         "rust",
         "bevy",

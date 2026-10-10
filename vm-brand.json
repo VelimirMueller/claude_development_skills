@@ -1,11 +1,11 @@
 {
-  "$comment": "VM. studio brand manifest — see vm-brand/PLAYBOOK.md §7",
-  "group": "vlm",
+  "group": "lab",
   "tagline": "Opinions, packaged.",
   "sublabel": "CLAUDE CODE · PLUGINS · AUDIT-FIRST",
-  "bannerVersion": "v1",
+  "bannerVersion": "v2",
   "art": {
-    "file": "vlm/vlm-v1-seed203.png",
-    "seed": 203
-  }
+    "file": "v2/lab-claude-skills.png",
+    "seed": 333
+  },
+  "status": "STABLE · v0.7.1"
 }
