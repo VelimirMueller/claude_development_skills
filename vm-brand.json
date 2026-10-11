@@ -1,10 +1,10 @@
 {
-  "group": "lab",
+  "group": "flagship",
   "tagline": "Opinions, packaged.",
   "sublabel": "CLAUDE CODE · PLUGINS · AUDIT-FIRST",
   "bannerVersion": "v2",
   "art": {
-    "file": "v2/lab-claude-skills.png",
+    "file": "v2/claude-skills.png",
     "seed": 333
   },
   "status": "STABLE · v0.7.1"

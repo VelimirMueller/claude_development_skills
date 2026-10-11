@@ -7,13 +7,13 @@ The full catalogue, the install commands, the team setup, the run example and th
 One step per plugin (Claude Code 2.1.275 or later adds the marketplace on the way):
 
 ```text
-/plugin install devcore --marketplace VelimirMueller/lab-claude-skills
-/plugin install frontendskills --marketplace VelimirMueller/lab-claude-skills
-/plugin install backendskills --marketplace VelimirMueller/lab-claude-skills
-/plugin install infraskills --marketplace VelimirMueller/lab-claude-skills
-/plugin install cliskills --marketplace VelimirMueller/lab-claude-skills
-/plugin install aiskills --marketplace VelimirMueller/lab-claude-skills
-/plugin install gameskills --marketplace VelimirMueller/lab-claude-skills
+/plugin install devcore --marketplace VelimirMueller/claude-skills
+/plugin install frontendskills --marketplace VelimirMueller/claude-skills
+/plugin install backendskills --marketplace VelimirMueller/claude-skills
+/plugin install infraskills --marketplace VelimirMueller/claude-skills
+/plugin install cliskills --marketplace VelimirMueller/claude-skills
+/plugin install aiskills --marketplace VelimirMueller/claude-skills
+/plugin install gameskills --marketplace VelimirMueller/claude-skills
 ```
 
 Update with `/plugin marketplace update frontendskills`.
@@ -160,7 +160,7 @@ trusts the folder gets the skills:
 {
   "extraKnownMarketplaces": {
     "frontendskills": {
-      "source": { "source": "github", "repo": "VelimirMueller/lab-claude-skills" }
+      "source": { "source": "github", "repo": "VelimirMueller/claude-skills" }
     }
   },
   "enabledPlugins": {
