@@ -1,12 +1,12 @@
 {
-  "group": "lab",
+  "group": "flagship",
   "version": "v2",
   "dividers": [
-    { "key": "what", "index": "01", "title": "WHAT IT DOES", "caption": "Judgment, executable.", "art": "strip-lab-1" },
-    { "key": "start", "index": "02", "title": "QUICK START", "caption": "Two commands. One wizard.", "art": "strip-lab-2" },
-    { "key": "how", "index": "03", "title": "HOW IT WORKS", "caption": "Audit. Apply. Verify. No-op.", "art": "strip-lab-3" },
-    { "key": "usage", "index": "04", "title": "USAGE", "caption": "Seventy-three skills, condensed.", "art": "strip-lab-4" },
-    { "key": "status", "index": "05", "title": "STATUS", "caption": "One version, everywhere.", "art": "strip-lab-5" }
+    { "key": "what", "index": "01", "title": "WHAT IT DOES", "caption": "Judgment, executable.", "art": "strip-flagship-1" },
+    { "key": "start", "index": "02", "title": "QUICK START", "caption": "Two commands. One wizard.", "art": "strip-flagship-2" },
+    { "key": "how", "index": "03", "title": "HOW IT WORKS", "caption": "Audit. Apply. Verify. No-op.", "art": "strip-flagship-3" },
+    { "key": "usage", "index": "04", "title": "USAGE", "caption": "Seventy-three skills, condensed.", "art": "strip-flagship-4" },
+    { "key": "status", "index": "05", "title": "STATUS", "caption": "One version, everywhere.", "art": "strip-flagship-5" }
   ],
   "panels": [
     {
@@ -35,7 +35,7 @@
       "type": "terminal",
       "title": "Quick start",
       "lines": [
-        "$ /plugin marketplace add VelimirMueller/lab-claude-skills",
+        "$ /plugin marketplace add VelimirMueller/claude-skills",
         "$ /plugin install devcore@frontendskills",
         "# then ask Claude to \"set up my stack profile\""
       ]

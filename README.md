@@ -1,22 +1,17 @@
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="assets/banner/hero-v2-light.svg">
-  <img alt="lab-claude-skills. Opinions, packaged. Stable, v0.7.1. 73 skills in 7 plugins, one marketplace." src="assets/banner/hero-v2-dark.svg" width="100%">
+  <img alt="claude-skills. Opinions, packaged. Stable, v0.7.1. 73 skills in 7 plugins, one marketplace." src="assets/banner/hero-v2-dark.svg" width="100%">
 </picture>
 
 <p align="center">
 
-[![status: stable](https://img.shields.io/badge/status-stable-10b981?style=flat-square&labelColor=0a0a0b)](#-05-status) [![VM. lab](https://img.shields.io/badge/VM.-lab-8b5cf6?style=flat-square&labelColor=0a0a0b)](https://github.com/VelimirMueller) [![version: 0.7.1](https://img.shields.io/badge/version-0.7.1-8b5cf6?style=flat-square&labelColor=0a0a0b)](CHANGELOG.md) [![stack: claude code](https://img.shields.io/badge/claude_code-plugins-a1a1aa?style=flat-square&labelColor=0a0a0b)](https://www.claude.com)
+[![status: stable](https://img.shields.io/badge/status-stable-10b981?style=flat-square&labelColor=0a0a0b)](#-05-status) [![VM. flagship](https://img.shields.io/badge/VM.-flagship-6366f1?style=flat-square&labelColor=0a0a0b)](https://github.com/VelimirMueller) [![version: 0.7.1](https://img.shields.io/badge/version-0.7.1-6366f1?style=flat-square&labelColor=0a0a0b)](CHANGELOG.md) [![stack: claude code](https://img.shields.io/badge/claude_code-plugins-a1a1aa?style=flat-square&labelColor=0a0a0b)](https://www.claude.com)
 
 </p>
 
 > Opinions, packaged.
 
 ```text
-██       ████   █████
-██      ██  ██  ██  ██
-██      ██████  █████   █████
-██      ██  ██  ██  ██
-██████  ██  ██  █████
  █████  ██       ████   ██  ██  █████   ██████
 ██      ██      ██  ██  ██  ██  ██  ██  ██
 ██      ██      ██████  ██  ██  ██  ██  █████   █████
@@ -60,13 +55,13 @@ Senior engineering judgment as audit-first Claude Code skills. One plugin per do
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/readme/start-v2-dark.svg">
-  <img alt="Terminal: $ /plugin marketplace add VelimirMueller/lab-claude-skills | $ /plugin install devcore@frontendskills | # then ask Claude to &quot;set up my stack profile&quot;" src="assets/readme/start-v2-light.svg" width="100%">
+  <img alt="Terminal: $ /plugin marketplace add VelimirMueller/claude-skills | $ /plugin install devcore@frontendskills | # then ask Claude to &quot;set up my stack profile&quot;" src="assets/readme/start-v2-light.svg" width="100%">
 </picture>
 
 Add the marketplace, install `devcore`, then run the wizard:
 
 ```text
-/plugin marketplace add VelimirMueller/lab-claude-skills
+/plugin marketplace add VelimirMueller/claude-skills
 /plugin install devcore@frontendskills
 ```
 
@@ -183,4 +178,4 @@ Changes land in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-<sub>VM. studio / lab · open source · look per <code>vm-brand</code> playbook · [MIT](LICENSE) © 2026 Velimir Mueller</sub>
+<sub>VM. studio / flagship · open source · look per <code>vm-brand</code> playbook · [MIT](LICENSE) © 2026 Velimir Mueller</sub>
